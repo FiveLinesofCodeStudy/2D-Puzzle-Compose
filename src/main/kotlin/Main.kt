@@ -35,6 +35,14 @@ enum class Input {
     UP, DOWN, LEFT, RIGHT
 }
 
+val map = arrayOf(
+    arrayOf(2, 2, 2, 2, 2, 2, 2, 2),
+    arrayOf(2, 3, 0, 1, 1, 2, 0, 2),
+    arrayOf(2, 4, 2, 6, 1, 2, 0, 2),
+    arrayOf(2, 8, 4, 1, 1, 2, 0, 2),
+    arrayOf(2, 4, 1, 1, 1, 9, 0, 2),
+    arrayOf(2, 2, 2, 2, 2, 2, 2, 2)
+)
 
 fun remove(tile: Tile, mapState: MutableState<Array<Array<Int>>>) {
     val map = mapState.value
@@ -123,12 +131,15 @@ fun update(
             Input.LEFT -> {
                 moveHorizontal(-1, mapState, playerx, playery)
             }
+
             Input.RIGHT -> {
                 moveHorizontal(1, mapState, playerx, playery)
             }
+
             Input.UP -> {
                 moveVertical(-1, mapState, playerx, playery)
             }
+
             Input.DOWN -> {
                 moveVertical(1, mapState, playerx, playery)
             }
@@ -155,49 +166,6 @@ fun update(
             }
         }
     }
-}
-
-
-@Composable
-@Preview
-fun App(inputs: SnapshotStateList<Input>) {
-
-    val playerx = remember { mutableStateOf(1) }
-    val playery = remember { mutableStateOf(1) }
-    val map = remember {
-        mutableStateOf(
-            arrayOf(
-                arrayOf(2, 2, 2, 2, 2, 2, 2, 2),
-                arrayOf(2, 3, 0, 1, 1, 2, 0, 2),
-                arrayOf(2, 4, 2, 6, 1, 2, 0, 2),
-                arrayOf(2, 8, 4, 1, 1, 2, 0, 2),
-                arrayOf(2, 4, 1, 1, 1, 9, 0, 2),
-                arrayOf(2, 2, 2, 2, 2, 2, 2, 2)
-            )
-        )
-    }
-
-
-
-    MaterialTheme {
-        gameLoop(
-            inputs = inputs,
-            playerxState = playerx,
-            playeryState = playery,
-            mapState = map
-        )
-    }
-}
-
-@Composable
-fun gameLoop(
-    inputs: SnapshotStateList<Input>,
-    playerxState: MutableState<Int>,
-    playeryState: MutableState<Int>,
-    mapState: MutableState<Array<Array<Int>>>
-) {
-    update(inputs, mapState, playerxState, playeryState)
-    draw(mapState, playerxState, playeryState)
 }
 
 @Composable
@@ -243,6 +211,34 @@ fun draw(mapState: MutableState<Array<Array<Int>>>, playerxState: MutableState<I
     }
 }
 
+@Composable
+fun gameLoop(
+    inputs: SnapshotStateList<Input>,
+    playerxState: MutableState<Int>,
+    playeryState: MutableState<Int>,
+    mapState: MutableState<Array<Array<Int>>>
+) {
+    update(inputs, mapState, playerxState, playeryState)
+    draw(mapState, playerxState, playeryState)
+}
+
+@Composable
+@Preview
+fun App(inputs: SnapshotStateList<Input>) {
+
+    val playerx = remember { mutableStateOf(1) }
+    val playery = remember { mutableStateOf(1) }
+    val mapState = remember { mutableStateOf(map) }
+
+    MaterialTheme {
+        gameLoop(
+            inputs = inputs,
+            playerxState = playerx,
+            playeryState = playery,
+            mapState = mapState
+        )
+    }
+}
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() = application {
