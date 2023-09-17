@@ -126,6 +126,16 @@ fun update(
     playerx: MutableState<Int>,
     playery: MutableState<Int>
 ) {
+    handleInputs(inputs, mapState, playerx, playery)
+    updateMap(mapState)
+}
+
+private fun handleInputs(
+    inputs: SnapshotStateList<Input>,
+    mapState: MutableState<Array<Array<Int>>>,
+    playerx: MutableState<Int>,
+    playery: MutableState<Int>
+) {
     while (inputs.size > 0) {
         val current = inputs.removeLast()
         when (current) {
@@ -146,7 +156,9 @@ fun update(
             }
         }
     }
+}
 
+private fun updateMap(mapState: MutableState<Array<Array<Int>>>) {
     val map = mapState.value
     for (y in map.size - 1 downTo 0) {
         for (x in map[y].indices) {
@@ -169,8 +181,10 @@ fun update(
     }
 }
 
+
 @Composable
 fun draw(mapState: MutableState<Array<Array<Int>>>, playerxState: MutableState<Int>, playeryState: MutableState<Int>) {
+    // typescript와 달리 여기서는 canvas 객체를 따로 만들어서 재사용하는 건 없음.
     Canvas(modifier = Modifier.width(1200.dp).height(800.dp)) {
         drawMap(mapState)
         drawPlayer(playerxState, playeryState)
