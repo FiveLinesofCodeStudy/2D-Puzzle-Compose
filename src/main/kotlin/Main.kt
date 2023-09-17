@@ -138,22 +138,31 @@ private fun handleInputs(
 ) {
     while (inputs.size > 0) {
         val current = inputs.removeLast()
-        when (current) {
-            Input.LEFT -> {
-                moveHorizontal(-1, mapState, playerx, playery)
-            }
+        handleInput(current, mapState, playerx, playery)
+    }
+}
 
-            Input.RIGHT -> {
-                moveHorizontal(1, mapState, playerx, playery)
-            }
+private fun handleInput(
+    current: Input,
+    mapState: MutableState<Array<Array<Int>>>,
+    playerx: MutableState<Int>,
+    playery: MutableState<Int>
+) {
+    when (current) {
+        Input.LEFT -> {
+            moveHorizontal(-1, mapState, playerx, playery)
+        }
 
-            Input.UP -> {
-                moveVertical(-1, mapState, playerx, playery)
-            }
+        Input.RIGHT -> {
+            moveHorizontal(1, mapState, playerx, playery)
+        }
 
-            Input.DOWN -> {
-                moveVertical(1, mapState, playerx, playery)
-            }
+        Input.UP -> {
+            moveVertical(-1, mapState, playerx, playery)
+        }
+
+        Input.DOWN -> {
+            moveVertical(1, mapState, playerx, playery)
         }
     }
 }
@@ -162,22 +171,26 @@ private fun updateMap(mapState: MutableState<Array<Array<Int>>>) {
     val map = mapState.value
     for (y in map.size - 1 downTo 0) {
         for (x in map[y].indices) {
-            if ((map[y][x] == Tile.STONE.ordinal || map[y][x] == Tile.FALLING_STONE.ordinal)
-                && map[y + 1][x] == Tile.AIR.ordinal
-            ) {
-                map[y + 1][x] = Tile.FALLING_STONE.ordinal
-                map[y][x] = Tile.AIR.ordinal
-            } else if ((map[y][x] == Tile.BOX.ordinal || map[y][x] == Tile.FALLING_BOX.ordinal)
-                && map[y + 1][x] == Tile.AIR.ordinal
-            ) {
-                map[y + 1][x] = Tile.FALLING_BOX.ordinal
-                map[y][x] = Tile.AIR.ordinal
-            } else if (map[y][x] == Tile.FALLING_STONE.ordinal) {
-                map[y][x] = Tile.STONE.ordinal
-            } else if (map[y][x] == Tile.FALLING_BOX.ordinal) {
-                map[y][x] = Tile.BOX.ordinal
-            }
+            updateTile(y, x)
         }
+    }
+}
+
+private fun updateTile(y: Int, x: Int) {
+    if ((map[y][x] == Tile.STONE.ordinal || map[y][x] == Tile.FALLING_STONE.ordinal)
+        && map[y + 1][x] == Tile.AIR.ordinal
+    ) {
+        map[y + 1][x] = Tile.FALLING_STONE.ordinal
+        map[y][x] = Tile.AIR.ordinal
+    } else if ((map[y][x] == Tile.BOX.ordinal || map[y][x] == Tile.FALLING_BOX.ordinal)
+        && map[y + 1][x] == Tile.AIR.ordinal
+    ) {
+        map[y + 1][x] = Tile.FALLING_BOX.ordinal
+        map[y][x] = Tile.AIR.ordinal
+    } else if (map[y][x] == Tile.FALLING_STONE.ordinal) {
+        map[y][x] = Tile.STONE.ordinal
+    } else if (map[y][x] == Tile.FALLING_BOX.ordinal) {
+        map[y][x] = Tile.BOX.ordinal
     }
 }
 
