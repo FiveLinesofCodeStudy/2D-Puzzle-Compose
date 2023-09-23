@@ -32,9 +32,11 @@ enum class Tile {
     KEY2, LOCK2
 }
 
-enum class Input {
+enum class RawInput {
     UP, DOWN, LEFT, RIGHT
 }
+
+
 
 val map = arrayOf(
     arrayOf(2, 2, 2, 2, 2, 2, 2, 2),
@@ -143,27 +145,20 @@ private fun handleInputs(
 }
 
 private fun handleInput(
-    current: Input,
+    input: Input,
     mapState: MutableState<Array<Array<Int>>>,
     playerx: MutableState<Int>,
     playery: MutableState<Int>
 ) {
-    when (current) {
-        Input.LEFT -> {
-            moveHorizontal(-1, mapState, playerx, playery)
-        }
-
-        Input.RIGHT -> {
-            moveHorizontal(1, mapState, playerx, playery)
-        }
-
-        Input.UP -> {
-            moveVertical(-1, mapState, playerx, playery)
-        }
-
-        Input.DOWN -> {
-            moveVertical(1, mapState, playerx, playery)
-        }
+    // 4.1.2, 4.1.3 클래스로 타입 코드 대체
+    if (input.isLeft()) {
+        moveHorizontal(-1, mapState, playerx, playery)
+    } else if (input.isRight()) {
+        moveHorizontal(1, mapState, playerx, playery)
+    } else if (input.isUp()) {
+        moveVertical(-1, mapState, playerx, playery)
+    } else if (input.isDown()) {
+        moveVertical(1, mapState, playerx, playery)
     }
 }
 
@@ -286,16 +281,16 @@ fun main() = application {
 
     Window(onCloseRequest = ::exitApplication, onKeyEvent = {
         if (it.key == Key.DirectionUp && it.type == KeyEventType.KeyDown) {
-            inputs.add(Input.UP)
+            inputs.add(Up())
             true
         } else if (it.key == Key.DirectionDown && it.type == KeyEventType.KeyDown) {
-            inputs.add(Input.DOWN)
+            inputs.add(Down())
             true
         } else if (it.key == Key.DirectionLeft && it.type == KeyEventType.KeyDown) {
-            inputs.add(Input.LEFT)
+            inputs.add(Left())
             true
         } else if (it.key == Key.DirectionRight && it.type == KeyEventType.KeyDown) {
-            inputs.add(Input.RIGHT)
+            inputs.add(Right())
             true
         } else {
             false
