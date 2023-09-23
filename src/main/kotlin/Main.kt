@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -21,7 +22,7 @@ import androidx.compose.ui.window.application
 
 const val TITLE_SIZE = 100
 
-enum class Tile {
+enum class RawTile {
     AIR,
     FLUX,
     UNBREAKABLE,
@@ -29,16 +30,31 @@ enum class Tile {
     STONE, FALLING_STONE,
     BOX, FALLING_BOX,
     KEY1, LOCK1,
-    KEY2, LOCK2
+    KEY2, LOCK2;
+
+    companion object {
+        fun order(i: Int): RawTile {
+            return when (i) {
+                0 -> AIR
+                1 -> FLUX
+                2 -> UNBREAKABLE
+                3 -> PLAYER
+                4 -> STONE
+                5 -> FALLING_STONE
+                6 -> BOX
+                7 -> FALLING_BOX
+                8 -> KEY1
+                9 -> LOCK1
+                10 -> KEY2
+                11 -> LOCK2
+                else -> throw Exception("Unexpected tile: $i")
+            }
+        }
+    }
 }
 
-enum class RawInput {
-    UP, DOWN, LEFT, RIGHT
-}
 
-
-
-val map = arrayOf(
+val rawMap = arrayOf(
     arrayOf(2, 2, 2, 2, 2, 2, 2, 2),
     arrayOf(2, 3, 0, 1, 1, 2, 0, 2),
     arrayOf(2, 4, 2, 6, 1, 2, 0, 2),
@@ -47,12 +63,51 @@ val map = arrayOf(
     arrayOf(2, 2, 2, 2, 2, 2, 2, 2)
 )
 
-fun remove(tile: Tile, mapState: MutableState<Array<Array<Int>>>) {
-    val map = mapState.value
+var map: MutableList<MutableList<Tile2>> = mutableListOf()
+
+fun transformTile(tile: RawTile): Tile2 {
+    return when (tile) {
+        RawTile.AIR -> Air()
+        RawTile.PLAYER -> Player()
+        RawTile.UNBREAKABLE -> Unbreakable()
+        RawTile.STONE -> Stone()
+        RawTile.FALLING_STONE -> FallingStone()
+        RawTile.BOX -> Box()
+        RawTile.FALLING_BOX -> FallingBox()
+        RawTile.FLUX -> Flux()
+        RawTile.KEY1 -> Key1()
+        RawTile.LOCK1 -> Lock1()
+        RawTile.KEY2 -> Key2()
+        RawTile.LOCK2 -> Lock2()
+    }
+}
+
+fun transformMap(): MutableList<MutableList<Tile2>> {
+    map = mutableListOf()
+    for (y in rawMap.indices) {
+        map.add(MutableList(rawMap[y].size) { Air() })
+        for (x in rawMap[y].indices) {
+            map[y][x] = transformTile(RawTile.order(rawMap[y][x]))
+        }
+    }
+    return map
+}
+
+fun removeLock1() {
     for (y in map.indices) {
         for (x in map[y].indices) {
-            if (map[y][x] == tile.ordinal) {
-                map[y][x] = Tile.AIR.ordinal
+            if (map[y][x].isLock1()) {
+                map[y][x] = Air()
+            }
+        }
+    }
+}
+
+fun removeLock2() {
+    for (y in map.indices) {
+        for (x in map[y].indices) {
+            if (map[y][x].isLock2()) {
+                map[y][x] = Air()
             }
         }
     }
@@ -61,91 +116,81 @@ fun remove(tile: Tile, mapState: MutableState<Array<Array<Int>>>) {
 fun moveToTile(
     newx: Int,
     newy: Int,
-    mapState: MutableState<Array<Array<Int>>>,
     playerxState: MutableState<Int>,
     playeryState: MutableState<Int>
 ) {
-    val map = mapState.value
     val playerx = playerxState.value
     val playery = playeryState.value
-    map[playery][playerx] = Tile.AIR.ordinal
-    map[newy][newx] = Tile.PLAYER.ordinal
+    map[playery][playerx] = Air()
+    map[newy][newx] = Player()
     playerxState.value = newx
     playeryState.value = newy
 }
 
 fun moveHorizontal(
     dx: Int,
-    mapState: MutableState<Array<Array<Int>>>,
     playerxState: MutableState<Int>,
     playeryState: MutableState<Int>
 ) {
-    val map = mapState.value
     val playerx = playerxState.value
     val playery = playeryState.value
 
-    if (map[playery][playerx + dx] == Tile.FLUX.ordinal || map[playery][playerx + dx] == Tile.AIR.ordinal) {
-        moveToTile(playerx + dx, playery, mapState, playerxState, playeryState)
-    } else if ((map[playery][playerx + dx] == Tile.STONE.ordinal || map[playery][playerx + dx] == Tile.BOX.ordinal)
-        && map[playery][playerx + dx + dx] == Tile.AIR.ordinal && map[playery + 1][playerx + dx] != Tile.AIR.ordinal
+    if (map[playery][playerx + dx].isFlux() || map[playery][playerx + dx].isAir()) {
+        moveToTile(playerx + dx, playery, playerxState, playeryState)
+    } else if ((map[playery][playerx + dx].isStone() || map[playery][playerx + dx].isBox())
+        && map[playery][playerx + dx + dx].isAir() && !map[playery + 1][playerx + dx].isAir()
     ) {
         map[playery][playerx + dx + dx] = map[playery][playerx + dx]
-        moveToTile(playerx + dx, playery, mapState, playerxState, playeryState)
-    } else if (map[playery][playerx + dx] == Tile.KEY1.ordinal) {
-        remove(Tile.LOCK1, mapState)
-        moveToTile(playerx + dx, playery, mapState, playerxState, playeryState)
-    } else if (map[playery][playerx + dx] == Tile.KEY2.ordinal) {
-        remove(Tile.LOCK2, mapState)
-        moveToTile(playerx + dx, playery, mapState, playerxState, playeryState)
+        moveToTile(playerx + dx, playery, playerxState, playeryState)
+    } else if (map[playery][playerx + dx].isKey1()) {
+        removeLock1()
+        moveToTile(playerx + dx, playery, playerxState, playeryState)
+    } else if (map[playery][playerx + dx].isKey2()) {
+        removeLock2()
+        moveToTile(playerx + dx, playery, playerxState, playeryState)
     }
 }
 
 fun moveVertical(
     dy: Int,
-    mapState: MutableState<Array<Array<Int>>>,
     playerxState: MutableState<Int>,
     playeryState: MutableState<Int>
 ) {
-    val map = mapState.value
     val playerx = playerxState.value
     val playery = playeryState.value
-    if (map[playery + dy][playerx] == Tile.FLUX.ordinal
-        || map[playery + dy][playerx] == Tile.AIR.ordinal
+    if (map[playery + dy][playerx].isFlux() || map[playery + dy][playerx].isAir()
     ) {
-        moveToTile(playerx, playery + dy, mapState, playerxState, playeryState)
-    } else if (map[playery + dy][playerx] == Tile.KEY1.ordinal) {
-        remove(Tile.LOCK1, mapState)
-        moveToTile(playerx, playery + dy, mapState, playerxState, playeryState)
-    } else if (map[playery + dy][playerx] == Tile.KEY2.ordinal) {
-        remove(Tile.LOCK2, mapState)
-        moveToTile(playerx, playery + dy, mapState, playerxState, playeryState)
+        moveToTile(playerx, playery + dy, playerxState, playeryState)
+    } else if (map[playery + dy][playerx].isKey1()) {
+        removeLock1()
+        moveToTile(playerx, playery + dy, playerxState, playeryState)
+    } else if (map[playery + dy][playerx].isKey2()) {
+        removeLock2()
+        moveToTile(playerx, playery + dy, playerxState, playeryState)
     }
 }
 
 fun update(
     inputs: SnapshotStateList<Input>,
-    mapState: MutableState<Array<Array<Int>>>,
     playerx: MutableState<Int>,
     playery: MutableState<Int>
 ) {
-    handleInputs(inputs, mapState, playerx, playery)
-    updateMap(mapState)
+    handleInputs(inputs, playerx, playery)
+    updateMap()
 }
 
 private fun handleInputs(
     inputs: SnapshotStateList<Input>,
-    mapState: MutableState<Array<Array<Int>>>,
     playerx: MutableState<Int>,
     playery: MutableState<Int>
 ) {
     while (inputs.size > 0) {
         val current = inputs.removeLast()
-        current.handle(mapState, playerx, playery)
+        current.handle(map, playerx, playery)
     }
 }
 
-private fun updateMap(mapState: MutableState<Array<Array<Int>>>) {
-    val map = mapState.value
+private fun updateMap() {
     for (y in map.size - 1 downTo 0) {
         for (x in map[y].indices) {
             updateTile(y, x)
@@ -154,29 +199,32 @@ private fun updateMap(mapState: MutableState<Array<Array<Int>>>) {
 }
 
 private fun updateTile(y: Int, x: Int) {
-    if ((map[y][x] == Tile.STONE.ordinal || map[y][x] == Tile.FALLING_STONE.ordinal)
-        && map[y + 1][x] == Tile.AIR.ordinal
+    if ((map[y][x].isStone() || map[y][x].isFallingStone())
+        && map[y + 1][x].isAir()
     ) {
-        map[y + 1][x] = Tile.FALLING_STONE.ordinal
-        map[y][x] = Tile.AIR.ordinal
-    } else if ((map[y][x] == Tile.BOX.ordinal || map[y][x] == Tile.FALLING_BOX.ordinal)
-        && map[y + 1][x] == Tile.AIR.ordinal
+        map[y + 1][x] = FallingStone()
+        map[y][x] = Air()
+    } else if ((map[y][x].isBox() || map[y][x].isFallingBox())
+        && map[y + 1][x].isAir()
     ) {
-        map[y + 1][x] = Tile.FALLING_BOX.ordinal
-        map[y][x] = Tile.AIR.ordinal
-    } else if (map[y][x] == Tile.FALLING_STONE.ordinal) {
-        map[y][x] = Tile.STONE.ordinal
-    } else if (map[y][x] == Tile.FALLING_BOX.ordinal) {
-        map[y][x] = Tile.BOX.ordinal
+        map[y + 1][x] = FallingBox()
+        map[y][x] = Air()
+    } else if (map[y][x].isFallingStone()) {
+        map[y][x] = Stone()
+    } else if (map[y][x].isFallingBox()) {
+        map[y][x] = Box()
     }
 }
 
 
 @Composable
-fun draw(mapState: MutableState<Array<Array<Int>>>, playerxState: MutableState<Int>, playeryState: MutableState<Int>) {
+fun draw(
+    playerxState: MutableState<Int>,
+    playeryState: MutableState<Int>
+) {
     // typescript와 달리 여기서는 canvas 객체를 따로 만들어서 재사용하는 건 없음.
     Canvas(modifier = Modifier.width(1200.dp).height(800.dp)) {
-        drawMap(mapState)
+        drawMap()
         drawPlayer(playerxState, playeryState)
     }
 }
@@ -196,46 +244,32 @@ private fun DrawScope.drawPlayer(
     drawRect(color = Color(0xffff0000), player.topLeft, Size(TITLE_SIZE.toFloat(), TITLE_SIZE.toFloat()))
 }
 
-private fun DrawScope.drawMap(mapState: MutableState<Array<Array<Int>>>) {
-    val map = mapState.value
-
+private fun DrawScope.drawMap() {
     for (y in map.indices) {
         for (x in map[y].indices) {
-            val rect = Rect(
-                (x * TITLE_SIZE).toFloat(),
-                (y * TITLE_SIZE).toFloat(),
-                TITLE_SIZE.toFloat(),
-                TITLE_SIZE.toFloat()
-            )
-            val color = if (map[y][x] == Tile.FLUX.ordinal) {
-                Color(0xffccffcc)
-            } else if (map[y][x] == Tile.UNBREAKABLE.ordinal) {
-                Color(0xff999999)
-            } else if (map[y][x] == Tile.STONE.ordinal || map[y][x] == Tile.FALLING_STONE.ordinal) {
-                Color(0xff0000cc)
-            } else if (map[y][x] == Tile.BOX.ordinal || map[y][x] == Tile.FALLING_BOX.ordinal) {
-                Color(0xff8b4513)
-            } else if (map[y][x] == Tile.KEY1.ordinal || map[y][x] == Tile.LOCK1.ordinal) {
-                Color(0xffffcc00)
-            } else if (map[y][x] == Tile.KEY2.ordinal || map[y][x] == Tile.LOCK2.ordinal) {
-                Color(0xff00ccff)
-            } else {
-                Color.White
-            }
-            drawRect(color = color, topLeft = rect.topLeft, size = Size(TITLE_SIZE.toFloat(), TITLE_SIZE.toFloat()))
+            val color = map[y][x].color()
+            drawRectBy(color, x, y)
         }
     }
 }
+
+private fun DrawScope.drawRectBy(color: Color, x: Int, y: Int) {
+    drawRect(
+        color = color,
+        topLeft = Offset((x * TITLE_SIZE).toFloat(), (y * TITLE_SIZE).toFloat()),
+        size = Size(TITLE_SIZE.toFloat(), TITLE_SIZE.toFloat())
+    )
+}
+
 
 @Composable
 fun gameLoop(
     inputs: SnapshotStateList<Input>,
     playerxState: MutableState<Int>,
     playeryState: MutableState<Int>,
-    mapState: MutableState<Array<Array<Int>>>
 ) {
-    update(inputs, mapState, playerxState, playeryState)
-    draw(mapState, playerxState, playeryState)
+    update(inputs, playerxState, playeryState)
+    draw(playerxState, playeryState)
 }
 
 @Composable
@@ -244,14 +278,13 @@ fun App(inputs: SnapshotStateList<Input>) {
 
     val playerx = remember { mutableStateOf(1) }
     val playery = remember { mutableStateOf(1) }
-    val mapState = remember { mutableStateOf(map) }
+
 
     MaterialTheme {
         gameLoop(
             inputs = inputs,
             playerxState = playerx,
             playeryState = playery,
-            mapState = mapState
         )
     }
 }
@@ -260,7 +293,7 @@ fun App(inputs: SnapshotStateList<Input>) {
 fun main() = application {
 
     val inputs = remember { mutableStateListOf<Input>() }
-
+    transformMap()
     Window(onCloseRequest = ::exitApplication, onKeyEvent = {
         if (it.key == Key.DirectionUp && it.type == KeyEventType.KeyDown) {
             inputs.add(Up())

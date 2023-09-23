@@ -7,7 +7,7 @@ interface Input {
     fun isDown(): Boolean
 
     // 4.1.4 클래스로 코드 이관하기
-    fun handle(mapState: MutableState<Array<Array<Int>>>, playerx: MutableState<Int>, playery: MutableState<Int>)
+    fun handle(mapState: MutableList<MutableList<Tile2>>, playerx: MutableState<Int>, playery: MutableState<Int>)
 }
 
 class Right : Input {
@@ -17,11 +17,11 @@ class Right : Input {
     override fun isDown(): Boolean = false
 
     override fun handle(
-        mapState: MutableState<Array<Array<Int>>>,
+        mapState: MutableList<MutableList<Tile2>>,
         playerx: MutableState<Int>,
         playery: MutableState<Int>
     ) {
-        moveHorizontal(1, mapState, playerx, playery)
+        moveHorizontal(1, playerx, playery)
     }
 }
 class Left : Input {
@@ -31,11 +31,11 @@ class Left : Input {
     override fun isDown(): Boolean = false
 
     override fun handle(
-        mapState: MutableState<Array<Array<Int>>>,
+        mapState: MutableList<MutableList<Tile2>>,
         playerx: MutableState<Int>,
         playery: MutableState<Int>
     ) {
-        moveHorizontal(-1, mapState, playerx, playery)
+        moveHorizontal(-1, playerx, playery)
     }
 }
 
@@ -46,11 +46,11 @@ class Up : Input {
     override fun isDown(): Boolean = false
 
     override fun handle(
-        mapState: MutableState<Array<Array<Int>>>,
+        mapState: MutableList<MutableList<Tile2>>,
         playerx: MutableState<Int>,
         playery: MutableState<Int>
     ) {
-        moveVertical(-1, mapState, playerx, playery)
+        moveVertical(-1, playerx, playery)
     }
 }
 
@@ -61,10 +61,10 @@ class Down : Input {
     override fun isDown(): Boolean = true
 
     override fun handle(
-        mapState: MutableState<Array<Array<Int>>>,
+        mapState: MutableList<MutableList<Tile2>>,
         playerx: MutableState<Int>,
         playery: MutableState<Int>
     ) {
-        moveVertical(1, mapState, playerx, playery)
+        moveVertical(1, playerx, playery)
     }
 }
