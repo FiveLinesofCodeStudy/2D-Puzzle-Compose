@@ -140,25 +140,7 @@ private fun handleInputs(
 ) {
     while (inputs.size > 0) {
         val current = inputs.removeLast()
-        handleInput(current, mapState, playerx, playery)
-    }
-}
-
-private fun handleInput(
-    input: Input,
-    mapState: MutableState<Array<Array<Int>>>,
-    playerx: MutableState<Int>,
-    playery: MutableState<Int>
-) {
-    // 4.1.2, 4.1.3 클래스로 타입 코드 대체
-    if (input.isLeft()) {
-        moveHorizontal(-1, mapState, playerx, playery)
-    } else if (input.isRight()) {
-        moveHorizontal(1, mapState, playerx, playery)
-    } else if (input.isUp()) {
-        moveVertical(-1, mapState, playerx, playery)
-    } else if (input.isDown()) {
-        moveVertical(1, mapState, playerx, playery)
+        current.handle(mapState, playerx, playery)
     }
 }
 
