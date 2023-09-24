@@ -1,6 +1,7 @@
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
 
-interface Tile2 {
+interface Tile {
     fun isFlux(): Boolean
     fun isUnbreakable(): Boolean
     fun isStone(): Boolean
@@ -18,10 +19,11 @@ interface Tile2 {
 
     fun color(): Color
 
+    fun draw(drawScope: DrawScope, x: Int, y: Int)
 }
 
 
-class Flux : Tile2 {
+class Flux : Tile {
     override fun isFlux(): Boolean = true
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = false
@@ -35,9 +37,11 @@ class Flux : Tile2 {
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = false
     override fun color(): Color = Color(0xffccffcc)
+
+    override fun draw(drawScope: DrawScope, x: Int, y: Int) = drawScope.drawRect(color = color(), topLeft = topLeft(x, y), size = size())
 }
 
-class Unbreakable : Tile2 {
+class Unbreakable : Tile {
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = true
     override fun isStone(): Boolean = false
@@ -51,10 +55,10 @@ class Unbreakable : Tile2 {
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = false
     override fun color(): Color = Color(0xff999999)
-
+    override fun draw(drawScope: DrawScope, x: Int, y: Int) = drawScope.drawRect(color = color(), topLeft = topLeft(x, y), size = size())
 }
 
-class Stone : Tile2 {
+class Stone : Tile {
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = true
@@ -68,10 +72,10 @@ class Stone : Tile2 {
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = false
     override fun color(): Color = Color(0xff0000cc)
-
+    override fun draw(drawScope: DrawScope, x: Int, y: Int) = drawScope.drawRect(color = color(), topLeft = topLeft(x, y), size = size())
 }
 
-class FallingStone : Tile2 {
+class FallingStone : Tile {
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = false
@@ -85,10 +89,10 @@ class FallingStone : Tile2 {
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = false
     override fun color(): Color = Color(0xff0000cc)
-
+    override fun draw(drawScope: DrawScope, x: Int, y: Int) = drawScope.drawRect(color = color(), topLeft = topLeft(x, y), size = size())
 }
 
-class Box : Tile2 {
+class Box : Tile {
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = false
@@ -102,10 +106,10 @@ class Box : Tile2 {
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = false
     override fun color(): Color = Color(0xff8b4513)
-
+    override fun draw(drawScope: DrawScope, x: Int, y: Int) = drawScope.drawRect(color = color(), topLeft = topLeft(x, y), size = size())
 }
 
-class FallingBox : Tile2 {
+class FallingBox : Tile {
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = false
@@ -119,10 +123,10 @@ class FallingBox : Tile2 {
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = false
     override fun color(): Color = Color(0xff8b4513)
-
+    override fun draw(drawScope: DrawScope, x: Int, y: Int) = drawScope.drawRect(color = color(), topLeft = topLeft(x, y), size = size())
 }
 
-class Key1 : Tile2 {
+class Key1 : Tile {
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = false
@@ -136,10 +140,10 @@ class Key1 : Tile2 {
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = false
     override fun color(): Color = Color(0xffffcc00)
-
+    override fun draw(drawScope: DrawScope, x: Int, y: Int) = drawScope.drawRect(color = color(), topLeft = topLeft(x, y), size = size())
 }
 
-class Lock1 : Tile2 {
+class Lock1 : Tile {
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = false
@@ -153,10 +157,10 @@ class Lock1 : Tile2 {
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = false
     override fun color(): Color = Color(0xffffcc00)
-
+    override fun draw(drawScope: DrawScope, x: Int, y: Int) = drawScope.drawRect(color = color(), topLeft = topLeft(x, y), size = size())
 }
 
-class Key2 : Tile2 {
+class Key2 : Tile {
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = false
@@ -170,10 +174,10 @@ class Key2 : Tile2 {
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = false
     override fun color(): Color = Color(0xff00ccff)
-
+    override fun draw(drawScope: DrawScope, x: Int, y: Int) = drawScope.drawRect(color = color(), topLeft = topLeft(x, y), size = size())
 }
 
-class Lock2 : Tile2 {
+class Lock2 : Tile {
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = false
@@ -187,10 +191,10 @@ class Lock2 : Tile2 {
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = false
     override fun color(): Color = Color(0xff00ccff)
-
+    override fun draw(drawScope: DrawScope, x: Int, y: Int) = drawScope.drawRect(color = color(), topLeft = topLeft(x, y), size = size())
 }
 
-class Air : Tile2 {
+class Air : Tile {
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = false
@@ -204,9 +208,10 @@ class Air : Tile2 {
     override fun isAir(): Boolean = true
     override fun isPlayer(): Boolean = false
     override fun color(): Color = Color.Transparent
+    override fun draw(drawScope: DrawScope, x: Int, y: Int) {}
 }
 
-class Player : Tile2 {
+class Player : Tile {
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = false
@@ -220,4 +225,6 @@ class Player : Tile2 {
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = true
     override fun color(): Color = Color.Transparent
+
+    override fun draw(drawScope: DrawScope, x: Int, y: Int) {}
 }

@@ -22,6 +22,8 @@ import androidx.compose.ui.window.application
 
 const val TITLE_SIZE = 100
 
+fun size() = Size(TITLE_SIZE.toFloat(), TITLE_SIZE.toFloat())
+
 enum class RawTile {
     AIR,
     FLUX,
@@ -63,9 +65,9 @@ val rawMap = arrayOf(
     arrayOf(2, 2, 2, 2, 2, 2, 2, 2)
 )
 
-var map: MutableList<MutableList<Tile2>> = mutableListOf()
+var map: MutableList<MutableList<Tile>> = mutableListOf()
 
-fun transformTile(tile: RawTile): Tile2 {
+fun transformTile(tile: RawTile): Tile {
     return when (tile) {
         RawTile.AIR -> Air()
         RawTile.PLAYER -> Player()
@@ -82,7 +84,7 @@ fun transformTile(tile: RawTile): Tile2 {
     }
 }
 
-fun transformMap(): MutableList<MutableList<Tile2>> {
+fun transformMap(): MutableList<MutableList<Tile>> {
     map = mutableListOf()
     for (y in rawMap.indices) {
         map.add(MutableList(rawMap[y].size) { Air() })
@@ -225,7 +227,7 @@ fun draw(
     // typescript와 달리 여기서는 canvas 객체를 따로 만들어서 재사용하는 건 없음.
     Canvas(modifier = Modifier.width(1200.dp).height(800.dp)) {
         drawMap()
-        drawPlayer(playerxState, playeryState)
+        drawPlayer(playerxState, playeryState)  // map 위에 Player 를 그림.
     }
 }
 
@@ -241,25 +243,18 @@ private fun DrawScope.drawPlayer(
         TITLE_SIZE.toFloat(),
         TITLE_SIZE.toFloat()
     )
-    drawRect(color = Color(0xffff0000), player.topLeft, Size(TITLE_SIZE.toFloat(), TITLE_SIZE.toFloat()))
+    drawRect(color = Color(0xffff0000), player.topLeft, size())
 }
 
 private fun DrawScope.drawMap() {
     for (y in map.indices) {
         for (x in map[y].indices) {
-            val color = map[y][x].color()
-            drawRectBy(color, x, y)
+            map[y][x].draw(this, x, y)
         }
     }
 }
 
-private fun DrawScope.drawRectBy(color: Color, x: Int, y: Int) {
-    drawRect(
-        color = color,
-        topLeft = Offset((x * TITLE_SIZE).toFloat(), (y * TITLE_SIZE).toFloat()),
-        size = Size(TITLE_SIZE.toFloat(), TITLE_SIZE.toFloat())
-    )
-}
+fun topLeft(x: Int, y: Int) = Offset((x * TITLE_SIZE).toFloat(), (y * TITLE_SIZE).toFloat())
 
 
 @Composable
