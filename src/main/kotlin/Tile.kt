@@ -17,13 +17,7 @@ interface Tile {
 
     fun isPlayer(): Boolean
 
-    fun color(): Color
-
     fun draw(drawScope: DrawScope, x: Int, y: Int)
-
-    fun isEdible(): Boolean
-
-    fun isPushable(): Boolean
 
     fun moveHorizontal(dx: Int)
 
@@ -45,20 +39,16 @@ class Flux : Tile {
     override fun isLock2(): Boolean = false
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = false
-    override fun color(): Color = Color(0xffccffcc)
 
     override fun draw(drawScope: DrawScope, x: Int, y: Int) =
-        drawScope.drawRect(color = color(), topLeft = topLeft(x, y), size = size())
-
-    override fun isEdible(): Boolean = true
-    override fun isPushable(): Boolean = false
+        drawScope.drawRect(color = Color(0xffccffcc), topLeft = topLeft(x, y), size = size())
 
     override fun moveHorizontal(dx: Int) {
-        moveToTile(playerxState.value + dx, playeryState.value)
+        moveToTile(playerXState.value + dx, playerYState.value)
     }
 
     override fun moveVertical(dy: Int) {
-        moveToTile(playerxState.value, playeryState.value + dy)
+        moveToTile(playerXState.value, playerYState.value + dy)
     }
 
     override fun update(x: Int, y: Int) {}
@@ -77,12 +67,9 @@ class Unbreakable : Tile {
     override fun isLock2(): Boolean = false
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = false
-    override fun color(): Color = Color(0xff999999)
     override fun draw(drawScope: DrawScope, x: Int, y: Int) =
-        drawScope.drawRect(color = color(), topLeft = topLeft(x, y), size = size())
+        drawScope.drawRect(color = Color(0xff999999), topLeft = topLeft(x, y), size = size())
 
-    override fun isEdible(): Boolean = false
-    override fun isPushable(): Boolean = false
     override fun moveHorizontal(dx: Int) {}
 
     override fun moveVertical(dy: Int) {}
@@ -103,16 +90,12 @@ class Stone : Tile {
     override fun isLock2(): Boolean = false
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = false
-    override fun color(): Color = Color(0xff0000cc)
     override fun draw(drawScope: DrawScope, x: Int, y: Int) =
-        drawScope.drawRect(color = color(), topLeft = topLeft(x, y), size = size())
-
-    override fun isEdible(): Boolean = false
-    override fun isPushable(): Boolean = true
+        drawScope.drawRect(color = Color(0xff0000cc), topLeft = topLeft(x, y), size = size())
 
     override fun moveHorizontal(dx: Int) {
-        val playerx = playerxState.value
-        val playery = playeryState.value
+        val playerx = playerXState.value
+        val playery = playerYState.value
 
         if (map[playery][playerx + dx + dx].isAir() && !map[playery + 1][playerx + dx].isAir()) {
             map[playery][playerx + dx + dx] = this
@@ -145,12 +128,9 @@ class FallingStone : Tile {
     override fun isLock2(): Boolean = false
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = false
-    override fun color(): Color = Color(0xff0000cc)
     override fun draw(drawScope: DrawScope, x: Int, y: Int) =
-        drawScope.drawRect(color = color(), topLeft = topLeft(x, y), size = size())
+        drawScope.drawRect(color = Color(0xff0000cc), topLeft = topLeft(x, y), size = size())
 
-    override fun isEdible(): Boolean = false
-    override fun isPushable(): Boolean = false
     override fun moveHorizontal(dx: Int) {}
 
     override fun moveVertical(dy: Int) {}
@@ -177,16 +157,12 @@ class Box : Tile {
     override fun isLock2(): Boolean = false
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = false
-    override fun color(): Color = Color(0xff8b4513)
     override fun draw(drawScope: DrawScope, x: Int, y: Int) =
-        drawScope.drawRect(color = color(), topLeft = topLeft(x, y), size = size())
-
-    override fun isEdible(): Boolean = false
-    override fun isPushable(): Boolean = true
+        drawScope.drawRect(color = Color(0xff8b4513), topLeft = topLeft(x, y), size = size())
 
     override fun moveHorizontal(dx: Int) {
-        val playerx = playerxState.value
-        val playery = playeryState.value
+        val playerx = playerXState.value
+        val playery = playerYState.value
 
         if (map[playery][playerx + dx + dx].isAir() && !map[playery + 1][playerx + dx].isAir()) {
             map[playery][playerx + dx + dx] = this
@@ -219,12 +195,9 @@ class FallingBox : Tile {
     override fun isLock2(): Boolean = false
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = false
-    override fun color(): Color = Color(0xff8b4513)
     override fun draw(drawScope: DrawScope, x: Int, y: Int) =
-        drawScope.drawRect(color = color(), topLeft = topLeft(x, y), size = size())
+        drawScope.drawRect(color = Color(0xff8b4513), topLeft = topLeft(x, y), size = size())
 
-    override fun isEdible(): Boolean = false
-    override fun isPushable(): Boolean = false
     override fun moveHorizontal(dx: Int) {}
     override fun moveVertical(dy: Int) {}
     override fun update(x: Int, y: Int) {
@@ -250,21 +223,17 @@ class Key1 : Tile {
     override fun isLock2(): Boolean = false
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = false
-    override fun color(): Color = Color(0xffffcc00)
     override fun draw(drawScope: DrawScope, x: Int, y: Int) =
-        drawScope.drawRect(color = color(), topLeft = topLeft(x, y), size = size())
-
-    override fun isEdible(): Boolean = false
-    override fun isPushable(): Boolean = false
+        drawScope.drawRect(color = Color(0xffffcc00), topLeft = topLeft(x, y), size = size())
 
     override fun moveHorizontal(dx: Int) {
         removeLock1()
-        moveToTile(playerxState.value + dx, playeryState.value)
+        moveToTile(playerXState.value + dx, playerYState.value)
     }
 
     override fun moveVertical(dy: Int) {
         removeLock1()
-        moveToTile(playerxState.value, playeryState.value + dy)
+        moveToTile(playerXState.value, playerYState.value + dy)
     }
 
     override fun update(x: Int, y: Int) {}
@@ -283,12 +252,10 @@ class Lock1 : Tile {
     override fun isLock2(): Boolean = false
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = false
-    override fun color(): Color = Color(0xffffcc00)
     override fun draw(drawScope: DrawScope, x: Int, y: Int) =
-        drawScope.drawRect(color = color(), topLeft = topLeft(x, y), size = size())
+        drawScope.drawRect(color = Color(0xffffcc00), topLeft = topLeft(x, y), size = size())
 
-    override fun isEdible(): Boolean = false
-    override fun isPushable(): Boolean = false
+
     override fun moveHorizontal(dx: Int) {}
 
     override fun moveVertical(dy: Int) {}
@@ -309,21 +276,18 @@ class Key2 : Tile {
     override fun isLock2(): Boolean = false
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = false
-    override fun color(): Color = Color(0xff00ccff)
     override fun draw(drawScope: DrawScope, x: Int, y: Int) =
-        drawScope.drawRect(color = color(), topLeft = topLeft(x, y), size = size())
+        drawScope.drawRect(color = Color(0xff00ccff), topLeft = topLeft(x, y), size = size())
 
-    override fun isEdible(): Boolean = false
-    override fun isPushable(): Boolean = false
 
     override fun moveHorizontal(dx: Int) {
         removeLock2()
-        moveToTile(playerxState.value + dx, playeryState.value)
+        moveToTile(playerXState.value + dx, playerYState.value)
     }
 
     override fun moveVertical(dy: Int) {
         removeLock2()
-        moveToTile(playerxState.value, playeryState.value + dy)
+        moveToTile(playerXState.value, playerYState.value + dy)
     }
 
     override fun update(x: Int, y: Int) {}
@@ -342,12 +306,10 @@ class Lock2 : Tile {
     override fun isLock2(): Boolean = true
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = false
-    override fun color(): Color = Color(0xff00ccff)
     override fun draw(drawScope: DrawScope, x: Int, y: Int) =
-        drawScope.drawRect(color = color(), topLeft = topLeft(x, y), size = size())
+        drawScope.drawRect(color = Color(0xff00ccff), topLeft = topLeft(x, y), size = size())
 
-    override fun isEdible(): Boolean = false
-    override fun isPushable(): Boolean = false
+
     override fun moveHorizontal(dx: Int) {}
 
     override fun moveVertical(dy: Int) {}
@@ -368,17 +330,15 @@ class Air : Tile {
     override fun isLock2(): Boolean = false
     override fun isAir(): Boolean = true
     override fun isPlayer(): Boolean = false
-    override fun color(): Color = Color.Transparent
     override fun draw(drawScope: DrawScope, x: Int, y: Int) {}
-    override fun isEdible(): Boolean = true
-    override fun isPushable(): Boolean = false
+
 
     override fun moveHorizontal(dx: Int) {
-        moveToTile(playerxState.value + dx, playeryState.value)
+        moveToTile(playerXState.value + dx, playerYState.value)
     }
 
     override fun moveVertical(dy: Int) {
-        moveToTile(playerxState.value, playeryState.value + dy)
+        moveToTile(playerXState.value, playerYState.value + dy)
     }
 
     override fun update(x: Int, y: Int) {}
@@ -397,11 +357,10 @@ class Player : Tile {
     override fun isLock2(): Boolean = false
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = true
-    override fun color(): Color = Color.Transparent
 
     override fun draw(drawScope: DrawScope, x: Int, y: Int) {}
-    override fun isEdible(): Boolean = false
-    override fun isPushable(): Boolean = false
+
+
     override fun moveHorizontal(dx: Int) {}
 
     override fun moveVertical(dy: Int) {}

@@ -21,39 +21,27 @@ const val TITLE_SIZE = 100
 
 fun size() = Size(TITLE_SIZE.toFloat(), TITLE_SIZE.toFloat())
 
-enum class RawTile {
-    AIR,
-    FLUX,
-    UNBREAKABLE,
-    PLAYER,
-    STONE, FALLING_STONE,
-    BOX, FALLING_BOX,
-    KEY1, LOCK1,
-    KEY2, LOCK2;
 
-    companion object {
-        fun order(i: Int): RawTile {
-            return when (i) {
-                0 -> AIR
-                1 -> FLUX
-                2 -> UNBREAKABLE
-                3 -> PLAYER
-                4 -> STONE
-                5 -> FALLING_STONE
-                6 -> BOX
-                7 -> FALLING_BOX
-                8 -> KEY1
-                9 -> LOCK1
-                10 -> KEY2
-                11 -> LOCK2
-                else -> throw Exception("Unexpected tile: $i")
-            }
-        }
+fun transform(i: Int): Tile {
+    return when (i) {
+        0 -> Air()
+        1 -> Flux()
+        2 -> Unbreakable()
+        3 -> Player()
+        4 -> Stone()
+        5 -> FallingStone()
+        6 -> Box()
+        7 -> FallingBox()
+        8 -> Key1()
+        9 -> Lock1()
+        10 -> Key2()
+        11 -> Lock2()
+        else -> throw Exception("Unexpected tile: $i")
     }
 }
 
-val playerxState = mutableStateOf(1)
-val playeryState = mutableStateOf(1)
+val playerXState = mutableStateOf(1)
+val playerYState = mutableStateOf(1)
 
 val rawMap = arrayOf(
     arrayOf(2, 2, 2, 2, 2, 2, 2, 2),
@@ -66,28 +54,13 @@ val rawMap = arrayOf(
 
 var map: MutableList<MutableList<Tile>> = mutableListOf()
 
-fun transformTile(tile: RawTile): Tile {
-    return when (tile) {
-        RawTile.AIR -> Air()
-        RawTile.PLAYER -> Player()
-        RawTile.UNBREAKABLE -> Unbreakable()
-        RawTile.STONE -> Stone()
-        RawTile.FALLING_STONE -> FallingStone()
-        RawTile.BOX -> Box()
-        RawTile.FALLING_BOX -> FallingBox()
-        RawTile.FLUX -> Flux()
-        RawTile.KEY1 -> Key1()
-        RawTile.LOCK1 -> Lock1()
-        RawTile.KEY2 -> Key2()
-        RawTile.LOCK2 -> Lock2()
-    }
-}
+val inputs = mutableStateListOf<Input>()
 
 fun transformMap() {
     map = MutableList(rawMap.size) { MutableList(rawMap[0].size) { Air() } }
     for (y in rawMap.indices) {
         for (x in rawMap[y].indices) {
-            map[y][x] = transformTile(RawTile.order(rawMap[y][x]))
+            map[y][x] = transform(rawMap[y][x])
         }
     }
 }
@@ -113,10 +86,10 @@ fun removeLock2() {
 }
 
 fun moveToTile(newx: Int, newy: Int) {
-    map[playeryState.value][playerxState.value] = Air()
+    map[playerYState.value][playerXState.value] = Air()
     map[newy][newx] = Player()
-    playerxState.value = newx
-    playeryState.value = newy
+    playerXState.value = newx
+    playerYState.value = newy
 }
 
 fun update(inputs: SnapshotStateList<Input>) {
@@ -151,8 +124,8 @@ fun draw() {
 
 private fun DrawScope.drawPlayer() {
     val player = Rect(
-        playerxState.value * TITLE_SIZE.toFloat(),
-        playeryState.value * TITLE_SIZE.toFloat(),
+        playerXState.value * TITLE_SIZE.toFloat(),
+        playerYState.value * TITLE_SIZE.toFloat(),
         TITLE_SIZE.toFloat(),
         TITLE_SIZE.toFloat()
     )
@@ -187,7 +160,6 @@ fun App(inputs: SnapshotStateList<Input>) {
     }
 }
 
-val inputs = mutableStateListOf<Input>()
 fun main() = application {
 
     transformMap()
