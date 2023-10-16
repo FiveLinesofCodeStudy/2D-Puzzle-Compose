@@ -22,7 +22,9 @@ interface Tile {
     fun moveHorizontal(dx: Int)
 
     fun moveVertical(dy: Int)
-    fun update(x: Int, y: Int)
+
+    fun isStony(): Boolean
+    fun isBoxy(): Boolean
 }
 
 
@@ -51,7 +53,9 @@ class Flux : Tile {
         moveToTile(playerXState.value, playerYState.value + dy)
     }
 
-    override fun update(x: Int, y: Int) {}
+    override fun isStony(): Boolean = false
+
+    override fun isBoxy(): Boolean = false
 }
 
 class Unbreakable : Tile {
@@ -73,15 +77,51 @@ class Unbreakable : Tile {
     override fun moveHorizontal(dx: Int) {}
 
     override fun moveVertical(dy: Int) {}
+    override fun isStony(): Boolean = false
 
-    override fun update(x: Int, y: Int) {}
+    override fun isBoxy(): Boolean = false
 }
 
-class Stone : Tile {
+interface FallingState {
+    fun isFalling(): Boolean
+
+    fun moveHorizontal(tile: Tile, dx: Int)
+}
+
+class Falling : FallingState {
+    override fun isFalling(): Boolean = true
+    override fun moveHorizontal(tile: Tile, dx: Int) {
+
+    }
+}
+
+class Resting : FallingState {
+    override fun isFalling(): Boolean = false
+    override fun moveHorizontal(tile: Tile, dx: Int) {
+        val playerX = playerXState.value
+        val playerY = playerYState.value
+
+        if (map[playerY][playerX + dx + dx].isAir() &&
+            !map[playerY + 1][playerX + dx].isAir()
+        ) {
+            map[playerY][playerX + dx + dx] = tile
+            moveToTile(playerX + dx, playerY)
+        }
+    }
+}
+
+class Stone(fallingState: FallingState) : Tile {
+
+    private val fallingState: FallingState
+
+    init {
+        this.fallingState = fallingState
+    }
+
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = true
-    override fun isFallingStone(): Boolean = false
+    override fun isFallingStone(): Boolean = fallingState.isFalling()
     override fun isBox(): Boolean = false
     override fun isFallingBox(): Boolean = false
     override fun isKey1(): Boolean = false
@@ -94,63 +134,32 @@ class Stone : Tile {
         drawScope.drawRect(color = Color(0xff0000cc), topLeft = topLeft(x, y), size = size())
 
     override fun moveHorizontal(dx: Int) {
-        val playerx = playerXState.value
-        val playery = playerYState.value
-
-        if (map[playery][playerx + dx + dx].isAir() && !map[playery + 1][playerx + dx].isAir()) {
-            map[playery][playerx + dx + dx] = this
-            moveToTile(playerx + dx, playery)
-        }
+        this.fallingState.moveHorizontal(this, dx)
     }
 
     override fun moveVertical(dy: Int) {
 
     }
 
-    override fun update(x: Int, y: Int) {
-        if (map[y + 1][x].isAir()) {
-            map[y + 1][x] = FallingStone()
-            map[y][x] = Air()
-        }
-    }
+    override fun isStony(): Boolean = true
+
+    override fun isBoxy(): Boolean = false
 }
 
-class FallingStone : Tile {
-    override fun isFlux(): Boolean = false
-    override fun isUnbreakable(): Boolean = false
-    override fun isStone(): Boolean = false
-    override fun isFallingStone(): Boolean = true
-    override fun isBox(): Boolean = false
-    override fun isFallingBox(): Boolean = false
-    override fun isKey1(): Boolean = false
-    override fun isLock1(): Boolean = false
-    override fun isKey2(): Boolean = false
-    override fun isLock2(): Boolean = false
-    override fun isAir(): Boolean = false
-    override fun isPlayer(): Boolean = false
-    override fun draw(drawScope: DrawScope, x: Int, y: Int) =
-        drawScope.drawRect(color = Color(0xff0000cc), topLeft = topLeft(x, y), size = size())
+class Box(fallingState: FallingState) : Tile {
 
-    override fun moveHorizontal(dx: Int) {}
+    private val fallingState: FallingState
 
-    override fun moveVertical(dy: Int) {}
-    override fun update(x: Int, y: Int) {
-        if (map[y + 1][x].isAir()) {
-            map[y + 1][x] = FallingStone()
-            map[y][x] = Air()
-        } else {
-            map[y][x] = Stone()
-        }
+    init {
+        this.fallingState = fallingState
     }
-}
 
-class Box : Tile {
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = false
     override fun isFallingStone(): Boolean = false
     override fun isBox(): Boolean = true
-    override fun isFallingBox(): Boolean = false
+    override fun isFallingBox(): Boolean = this.fallingState.isFalling()
     override fun isKey1(): Boolean = false
     override fun isLock1(): Boolean = false
     override fun isKey2(): Boolean = false
@@ -161,53 +170,21 @@ class Box : Tile {
         drawScope.drawRect(color = Color(0xff8b4513), topLeft = topLeft(x, y), size = size())
 
     override fun moveHorizontal(dx: Int) {
-        val playerx = playerXState.value
-        val playery = playerYState.value
-
-        if (map[playery][playerx + dx + dx].isAir() && !map[playery + 1][playerx + dx].isAir()) {
-            map[playery][playerx + dx + dx] = this
-            moveToTile(playerx + dx, playery)
-        }
+        this.fallingState.moveHorizontal(this, dx)
     }
 
     override fun moveVertical(dy: Int) {
 
     }
 
-    override fun update(x: Int, y: Int) {
-        if (map[y + 1][x].isAir()) {
-            map[y + 1][x] = FallingBox()
-            map[y][x] = Air()
-        }
+    override fun isStony(): Boolean {
+        return false
     }
-}
 
-class FallingBox : Tile {
-    override fun isFlux(): Boolean = false
-    override fun isUnbreakable(): Boolean = false
-    override fun isStone(): Boolean = false
-    override fun isFallingStone(): Boolean = false
-    override fun isBox(): Boolean = false
-    override fun isFallingBox(): Boolean = true
-    override fun isKey1(): Boolean = false
-    override fun isLock1(): Boolean = false
-    override fun isKey2(): Boolean = false
-    override fun isLock2(): Boolean = false
-    override fun isAir(): Boolean = false
-    override fun isPlayer(): Boolean = false
-    override fun draw(drawScope: DrawScope, x: Int, y: Int) =
-        drawScope.drawRect(color = Color(0xff8b4513), topLeft = topLeft(x, y), size = size())
-
-    override fun moveHorizontal(dx: Int) {}
-    override fun moveVertical(dy: Int) {}
-    override fun update(x: Int, y: Int) {
-        if (map[y + 1][x].isAir()) {
-            map[y + 1][x] = FallingBox()
-            map[y][x] = Air()
-        } else {
-            map[y][x] = Box()
-        }
+    override fun isBoxy(): Boolean {
+        return true
     }
+
 }
 
 class Key1 : Tile {
@@ -236,7 +213,14 @@ class Key1 : Tile {
         moveToTile(playerXState.value, playerYState.value + dy)
     }
 
-    override fun update(x: Int, y: Int) {}
+    override fun isStony(): Boolean {
+        return false
+    }
+
+    override fun isBoxy(): Boolean {
+        return false
+    }
+
 }
 
 class Lock1 : Tile {
@@ -259,8 +243,15 @@ class Lock1 : Tile {
     override fun moveHorizontal(dx: Int) {}
 
     override fun moveVertical(dy: Int) {}
+    override fun isStony(): Boolean {
+        return false
+    }
 
-    override fun update(x: Int, y: Int) {}
+    override fun isBoxy(): Boolean {
+        return false
+    }
+
+
 }
 
 class Key2 : Tile {
@@ -290,7 +281,15 @@ class Key2 : Tile {
         moveToTile(playerXState.value, playerYState.value + dy)
     }
 
-    override fun update(x: Int, y: Int) {}
+    override fun isStony(): Boolean {
+        return false
+    }
+
+    override fun isBoxy(): Boolean {
+        return false
+    }
+
+
 }
 
 class Lock2 : Tile {
@@ -313,8 +312,15 @@ class Lock2 : Tile {
     override fun moveHorizontal(dx: Int) {}
 
     override fun moveVertical(dy: Int) {}
+    override fun isStony(): Boolean {
+        return false
+    }
 
-    override fun update(x: Int, y: Int) {}
+    override fun isBoxy(): Boolean {
+        return false
+    }
+
+
 }
 
 class Air : Tile {
@@ -341,7 +347,15 @@ class Air : Tile {
         moveToTile(playerXState.value, playerYState.value + dy)
     }
 
-    override fun update(x: Int, y: Int) {}
+    override fun isStony(): Boolean {
+        return false
+    }
+
+    override fun isBoxy(): Boolean {
+        return false
+    }
+
+
 }
 
 class Player : Tile {
@@ -364,6 +378,9 @@ class Player : Tile {
     override fun moveHorizontal(dx: Int) {}
 
     override fun moveVertical(dy: Int) {}
+    override fun isStony(): Boolean = false
 
-    override fun update(x: Int, y: Int) {}
+    override fun isBoxy(): Boolean = false
+
+
 }

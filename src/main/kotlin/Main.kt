@@ -28,10 +28,10 @@ fun transform(i: Int): Tile {
         1 -> Flux()
         2 -> Unbreakable()
         3 -> Player()
-        4 -> Stone()
-        5 -> FallingStone()
-        6 -> Box()
-        7 -> FallingBox()
+        4 -> Stone(Falling())
+        5 -> Stone(Resting())
+        6 -> Box(Resting())
+        7 -> Box(Falling())
         8 -> Key1()
         9 -> Lock1()
         10 -> Key2()
@@ -107,10 +107,29 @@ private fun handleInputs(inputs: SnapshotStateList<Input>) {
 private fun updateMap() {
     for (y in map.size - 1 downTo 0) {
         for (x in map[y].indices) {
-            map[y][x].update(x, y)
+            updateTile(y, x)
         }
     }
 }
+
+private fun updateTile(y: Int, x: Int) {
+    if ((map[y][x].isStony())
+        && map[y + 1][x].isAir()
+    ) {
+        map[y + 1][x] = Stone(Falling())
+        map[y][x] = Air()
+    } else if (map[y][x].isBoxy()
+        && map[y + 1][x].isAir()
+    ) {
+        map[y + 1][x] = Box(Falling())
+        map[y][x] = Air()
+    } else if (map[y][x].isFallingStone()) {
+        map[y][x] = Stone(Resting())
+    } else if (map[y][x].isFallingBox()) {
+        map[y][x] = Box(Resting())
+    }
+}
+
 
 
 @Composable
