@@ -113,23 +113,14 @@ private fun updateMap() {
 }
 
 private fun updateTile(y: Int, x: Int) {
-    if ((map[y][x].isStony())
-        && map[y + 1][x].isAir()
-    ) {
-        map[y + 1][x] = Stone(Falling())
+    if (map[y][x].canFall() && map[y + 1][x].isAir()) {
+        map[y][x].drop()
+        map[y + 1][x] = map[y][x]
         map[y][x] = Air()
-    } else if (map[y][x].isBoxy()
-        && map[y + 1][x].isAir()
-    ) {
-        map[y + 1][x] = Box(Falling())
-        map[y][x] = Air()
-    } else if (map[y][x].isFallingStone()) {
-        map[y][x] = Stone(Resting())
-    } else if (map[y][x].isFallingBox()) {
-        map[y][x] = Box(Resting())
+    } else if (map[y][x].isFalling()) {
+        map[y][x].rest()
     }
 }
-
 
 
 @Composable

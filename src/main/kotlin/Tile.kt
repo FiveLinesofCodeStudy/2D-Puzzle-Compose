@@ -5,9 +5,7 @@ interface Tile {
     fun isFlux(): Boolean
     fun isUnbreakable(): Boolean
     fun isStone(): Boolean
-    fun isFallingStone(): Boolean
     fun isBox(): Boolean
-    fun isFallingBox(): Boolean
     fun isKey1(): Boolean
     fun isLock1(): Boolean
     fun isKey2(): Boolean
@@ -25,6 +23,13 @@ interface Tile {
 
     fun isStony(): Boolean
     fun isBoxy(): Boolean
+
+    fun drop()
+
+    fun rest()
+
+    fun isFalling(): Boolean
+    fun canFall(): Boolean
 }
 
 
@@ -32,9 +37,9 @@ class Flux : Tile {
     override fun isFlux(): Boolean = true
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = false
-    override fun isFallingStone(): Boolean = false
+
     override fun isBox(): Boolean = false
-    override fun isFallingBox(): Boolean = false
+
     override fun isKey1(): Boolean = false
     override fun isLock1(): Boolean = false
     override fun isKey2(): Boolean = false
@@ -56,15 +61,30 @@ class Flux : Tile {
     override fun isStony(): Boolean = false
 
     override fun isBoxy(): Boolean = false
+    override fun drop() {
+
+    }
+
+    override fun rest() {
+
+    }
+
+    override fun isFalling(): Boolean {
+        return false
+    }
+
+    override fun canFall(): Boolean {
+        return false
+    }
 }
 
 class Unbreakable : Tile {
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = true
     override fun isStone(): Boolean = false
-    override fun isFallingStone(): Boolean = false
+
     override fun isBox(): Boolean = false
-    override fun isFallingBox(): Boolean = false
+
     override fun isKey1(): Boolean = false
     override fun isLock1(): Boolean = false
     override fun isKey2(): Boolean = false
@@ -80,6 +100,21 @@ class Unbreakable : Tile {
     override fun isStony(): Boolean = false
 
     override fun isBoxy(): Boolean = false
+    override fun drop() {
+
+    }
+
+    override fun rest() {
+
+    }
+
+    override fun isFalling(): Boolean {
+        return false
+    }
+
+    override fun canFall(): Boolean {
+        return false
+    }
 }
 
 interface FallingState {
@@ -112,18 +147,18 @@ class Resting : FallingState {
 
 class Stone(fallingState: FallingState) : Tile {
 
-    private val fallingState: FallingState
+    private var falling: FallingState
 
     init {
-        this.fallingState = fallingState
+        this.falling = fallingState
     }
 
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = true
-    override fun isFallingStone(): Boolean = fallingState.isFalling()
+
     override fun isBox(): Boolean = false
-    override fun isFallingBox(): Boolean = false
+
     override fun isKey1(): Boolean = false
     override fun isLock1(): Boolean = false
     override fun isKey2(): Boolean = false
@@ -134,7 +169,7 @@ class Stone(fallingState: FallingState) : Tile {
         drawScope.drawRect(color = Color(0xff0000cc), topLeft = topLeft(x, y), size = size())
 
     override fun moveHorizontal(dx: Int) {
-        this.fallingState.moveHorizontal(this, dx)
+        this.falling.moveHorizontal(this, dx)
     }
 
     override fun moveVertical(dy: Int) {
@@ -144,22 +179,36 @@ class Stone(fallingState: FallingState) : Tile {
     override fun isStony(): Boolean = true
 
     override fun isBoxy(): Boolean = false
+    override fun drop() {
+        this.falling = Falling()
+    }
+
+    override fun rest() {
+        this.falling = Resting()
+    }
+
+    override fun isFalling(): Boolean {
+        return this.falling.isFalling()
+    }
+
+    override fun canFall(): Boolean {
+        return true
+    }
 }
 
 class Box(fallingState: FallingState) : Tile {
 
-    private val fallingState: FallingState
+    private var falling: FallingState
 
     init {
-        this.fallingState = fallingState
+        this.falling = fallingState
     }
 
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = false
-    override fun isFallingStone(): Boolean = false
+
     override fun isBox(): Boolean = true
-    override fun isFallingBox(): Boolean = this.fallingState.isFalling()
     override fun isKey1(): Boolean = false
     override fun isLock1(): Boolean = false
     override fun isKey2(): Boolean = false
@@ -170,7 +219,7 @@ class Box(fallingState: FallingState) : Tile {
         drawScope.drawRect(color = Color(0xff8b4513), topLeft = topLeft(x, y), size = size())
 
     override fun moveHorizontal(dx: Int) {
-        this.fallingState.moveHorizontal(this, dx)
+        this.falling.moveHorizontal(this, dx)
     }
 
     override fun moveVertical(dy: Int) {
@@ -185,15 +234,31 @@ class Box(fallingState: FallingState) : Tile {
         return true
     }
 
+    override fun drop() {
+        this.falling = Falling()
+    }
+
+    override fun rest() {
+        this.falling = Resting()
+    }
+
+    override fun isFalling(): Boolean {
+        return this.falling.isFalling()
+    }
+
+    override fun canFall(): Boolean {
+        return true
+    }
+
 }
 
 class Key1 : Tile {
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = false
-    override fun isFallingStone(): Boolean = false
+
     override fun isBox(): Boolean = false
-    override fun isFallingBox(): Boolean = false
+
     override fun isKey1(): Boolean = true
     override fun isLock1(): Boolean = false
     override fun isKey2(): Boolean = false
@@ -221,15 +286,31 @@ class Key1 : Tile {
         return false
     }
 
+    override fun drop() {
+
+    }
+
+    override fun rest() {
+
+    }
+
+    override fun isFalling(): Boolean {
+        return false
+    }
+
+    override fun canFall(): Boolean {
+        return false
+    }
+
 }
 
 class Lock1 : Tile {
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = false
-    override fun isFallingStone(): Boolean = false
+
     override fun isBox(): Boolean = false
-    override fun isFallingBox(): Boolean = false
+
     override fun isKey1(): Boolean = false
     override fun isLock1(): Boolean = true
     override fun isKey2(): Boolean = false
@@ -251,6 +332,22 @@ class Lock1 : Tile {
         return false
     }
 
+    override fun drop() {
+
+    }
+
+    override fun rest() {
+
+    }
+
+    override fun isFalling(): Boolean {
+        return false
+    }
+
+    override fun canFall(): Boolean {
+        return false
+    }
+
 
 }
 
@@ -258,9 +355,9 @@ class Key2 : Tile {
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = false
-    override fun isFallingStone(): Boolean = false
+
     override fun isBox(): Boolean = false
-    override fun isFallingBox(): Boolean = false
+
     override fun isKey1(): Boolean = false
     override fun isLock1(): Boolean = false
     override fun isKey2(): Boolean = true
@@ -289,6 +386,22 @@ class Key2 : Tile {
         return false
     }
 
+    override fun drop() {
+
+    }
+
+    override fun rest() {
+
+    }
+
+    override fun isFalling(): Boolean {
+        return false
+    }
+
+    override fun canFall(): Boolean {
+        return false
+    }
+
 
 }
 
@@ -296,9 +409,9 @@ class Lock2 : Tile {
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = false
-    override fun isFallingStone(): Boolean = false
+
     override fun isBox(): Boolean = false
-    override fun isFallingBox(): Boolean = false
+
     override fun isKey1(): Boolean = false
     override fun isLock1(): Boolean = false
     override fun isKey2(): Boolean = false
@@ -320,16 +433,30 @@ class Lock2 : Tile {
         return false
     }
 
+    override fun drop() {
 
+    }
+
+    override fun rest() {
+
+    }
+
+    override fun isFalling(): Boolean {
+        return false
+    }
+
+    override fun canFall(): Boolean {
+        return false
+    }
 }
 
 class Air : Tile {
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = false
-    override fun isFallingStone(): Boolean = false
+
     override fun isBox(): Boolean = false
-    override fun isFallingBox(): Boolean = false
+
     override fun isKey1(): Boolean = false
     override fun isLock1(): Boolean = false
     override fun isKey2(): Boolean = false
@@ -355,16 +482,30 @@ class Air : Tile {
         return false
     }
 
+    override fun drop() {
 
+    }
+
+    override fun rest() {
+
+    }
+
+    override fun isFalling(): Boolean {
+        return false
+    }
+
+    override fun canFall(): Boolean {
+        return false
+    }
 }
 
 class Player : Tile {
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = false
-    override fun isFallingStone(): Boolean = false
+
     override fun isBox(): Boolean = false
-    override fun isFallingBox(): Boolean = false
+
     override fun isKey1(): Boolean = false
     override fun isLock1(): Boolean = false
     override fun isKey2(): Boolean = false
@@ -374,13 +515,23 @@ class Player : Tile {
 
     override fun draw(drawScope: DrawScope, x: Int, y: Int) {}
 
-
     override fun moveHorizontal(dx: Int) {}
 
     override fun moveVertical(dy: Int) {}
     override fun isStony(): Boolean = false
 
     override fun isBoxy(): Boolean = false
+    override fun drop() {}
+
+    override fun rest() {}
+
+    override fun isFalling(): Boolean {
+        return false
+    }
+
+    override fun canFall(): Boolean {
+        return false
+    }
 
 
 }
