@@ -30,6 +30,26 @@ interface Tile {
 
     fun isFalling(): Boolean
     fun canFall(): Boolean
+
+    fun update(x: Int, y: Int)
+}
+
+class FallStrategy(private var falling: FallingState) {
+    fun update(tile: Tile, x: Int, y: Int) {
+        this.falling = if (map[y + 1][x].isAir()) Falling() else Resting()
+        drop(y, x, tile)
+    }
+    private fun drop(y: Int, x: Int, tile: Tile) {
+        if (this.falling.isFalling()) {
+            map[y + 1][x] = tile
+            map[y][x] = Air()
+        }
+    }
+
+    fun isFalling(): FallingState {
+        return this.falling
+    }
+
 }
 
 
@@ -76,6 +96,10 @@ class Flux : Tile {
     override fun canFall(): Boolean {
         return false
     }
+
+    override fun update(x: Int, y: Int) {
+
+    }
 }
 
 class Unbreakable : Tile {
@@ -115,6 +139,10 @@ class Unbreakable : Tile {
     override fun canFall(): Boolean {
         return false
     }
+
+    override fun update(x: Int, y: Int) {
+
+    }
 }
 
 interface FallingState {
@@ -145,13 +173,8 @@ class Resting : FallingState {
     }
 }
 
-class Stone(fallingState: FallingState) : Tile {
-
-    private var falling: FallingState
-
-    init {
-        this.falling = fallingState
-    }
+class Stone(private var falling: FallingState) : Tile {
+    private var fallStrategy: FallStrategy = FallStrategy(falling)
 
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
@@ -169,7 +192,7 @@ class Stone(fallingState: FallingState) : Tile {
         drawScope.drawRect(color = Color(0xff0000cc), topLeft = topLeft(x, y), size = size())
 
     override fun moveHorizontal(dx: Int) {
-        this.falling.moveHorizontal(this, dx)
+        this.fallStrategy.isFalling().moveHorizontal(this, dx)
     }
 
     override fun moveVertical(dy: Int) {
@@ -194,15 +217,14 @@ class Stone(fallingState: FallingState) : Tile {
     override fun canFall(): Boolean {
         return true
     }
+
+    override fun update(x: Int, y: Int) {
+        this.fallStrategy.update(this, x, y)
+    }
 }
 
-class Box(fallingState: FallingState) : Tile {
-
-    private var falling: FallingState
-
-    init {
-        this.falling = fallingState
-    }
+class Box(private var falling: FallingState) : Tile {
+    private var fallStrategy: FallStrategy = FallStrategy(falling)
 
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
@@ -248,6 +270,10 @@ class Box(fallingState: FallingState) : Tile {
 
     override fun canFall(): Boolean {
         return true
+    }
+
+    override fun update(x: Int, y: Int) {
+        this.fallStrategy.update(this, x, y)
     }
 
 }
@@ -302,6 +328,10 @@ class Key1 : Tile {
         return false
     }
 
+    override fun update(x: Int, y: Int) {
+
+    }
+
 }
 
 class Lock1 : Tile {
@@ -346,6 +376,10 @@ class Lock1 : Tile {
 
     override fun canFall(): Boolean {
         return false
+    }
+
+    override fun update(x: Int, y: Int) {
+
     }
 
 
@@ -402,6 +436,10 @@ class Key2 : Tile {
         return false
     }
 
+    override fun update(x: Int, y: Int) {
+
+    }
+
 
 }
 
@@ -447,6 +485,10 @@ class Lock2 : Tile {
 
     override fun canFall(): Boolean {
         return false
+    }
+
+    override fun update(x: Int, y: Int) {
+
     }
 }
 
@@ -497,6 +539,10 @@ class Air : Tile {
     override fun canFall(): Boolean {
         return false
     }
+
+    override fun update(x: Int, y: Int) {
+
+    }
 }
 
 class Player : Tile {
@@ -531,6 +577,10 @@ class Player : Tile {
 
     override fun canFall(): Boolean {
         return false
+    }
+
+    override fun update(x: Int, y: Int) {
+
     }
 
 
