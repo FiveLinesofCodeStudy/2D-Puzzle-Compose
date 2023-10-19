@@ -34,6 +34,22 @@ interface Tile {
     fun update(x: Int, y: Int)
 }
 
+interface RemoveStrategy {
+    fun check(tile: Tile): Boolean
+}
+
+class RemoveLock1 : RemoveStrategy {
+    override fun check(tile: Tile): Boolean {
+        return tile.isLock1()
+    }
+}
+
+class RemoveLock2 : RemoveStrategy {
+    override fun check(tile: Tile): Boolean {
+        return tile.isLock2()
+    }
+}
+
 class FallStrategy(private var falling: FallingState) {
     fun update(tile: Tile, x: Int, y: Int) {
         this.falling = if (map[y + 1][x].isAir()) Falling() else Resting()
@@ -295,12 +311,12 @@ class Key1 : Tile {
         drawScope.drawRect(color = Color(0xffffcc00), topLeft = topLeft(x, y), size = size())
 
     override fun moveHorizontal(dx: Int) {
-        removeLock1()
+        remove(RemoveLock1())
         moveToTile(playerXState.value + dx, playerYState.value)
     }
 
     override fun moveVertical(dy: Int) {
-        removeLock1()
+        remove(RemoveLock1())
         moveToTile(playerXState.value, playerYState.value + dy)
     }
 

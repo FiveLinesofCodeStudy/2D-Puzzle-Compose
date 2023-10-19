@@ -65,10 +65,10 @@ fun transformMap() {
     }
 }
 
-fun removeLock1() {
+fun remove(shouldRemove: RemoveStrategy) {
     for (y in map.indices) {
         for (x in map[y].indices) {
-            if (map[y][x].isLock1()) {
+            if (shouldRemove.check(map[y][x])) {
                 map[y][x] = Air()
             }
         }
@@ -76,13 +76,7 @@ fun removeLock1() {
 }
 
 fun removeLock2() {
-    for (y in map.indices) {
-        for (x in map[y].indices) {
-            if (map[y][x].isLock2()) {
-                map[y][x] = Air()
-            }
-        }
-    }
+    remove(RemoveLock2())
 }
 
 fun moveToTile(newx: Int, newy: Int) {
