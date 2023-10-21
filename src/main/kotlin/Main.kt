@@ -32,10 +32,10 @@ fun transform(i: Int): Tile {
         5 -> Stone(Resting())
         6 -> Box(Resting())
         7 -> Box(Falling())
-        8 -> Key1()
-        9 -> Lock1()
-        10 -> Key2()
-        11 -> Lock2()
+        8 -> TileKey(KeyConfiguration(Color(0xffffcc00), RemoveLock1(), true))
+        9 -> Lock(KeyConfiguration(Color(0xffffcc00), RemoveLock1(), is1 = true))
+        10 -> TileKey(KeyConfiguration(Color(0xff00ccff), RemoveLock2(), is1 = false))
+        11 -> Lock(KeyConfiguration(Color(0xff00ccff), RemoveLock2(), is1 = false))
         else -> throw Exception("Unexpected tile: $i")
     }
 }
@@ -73,10 +73,6 @@ fun remove(shouldRemove: RemoveStrategy) {
             }
         }
     }
-}
-
-fun removeLock2() {
-    remove(RemoveLock2())
 }
 
 fun moveToTile(newx: Int, newy: Int) {

@@ -294,7 +294,13 @@ class Box(private var falling: FallingState) : Tile {
 
 }
 
-class Key1 : Tile {
+data class KeyConfiguration (
+    val color: Color,
+    val removeStrategy: RemoveStrategy,
+    val is1: Boolean = false
+)
+
+class TileKey(private val keyConfiguration: KeyConfiguration) : Tile {
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = false
@@ -308,15 +314,15 @@ class Key1 : Tile {
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = false
     override fun draw(drawScope: DrawScope, x: Int, y: Int) =
-        drawScope.drawRect(color = Color(0xffffcc00), topLeft = topLeft(x, y), size = size())
+        drawScope.drawRect(color = this.keyConfiguration.color, topLeft = topLeft(x, y), size = size())
 
     override fun moveHorizontal(dx: Int) {
-        remove(RemoveLock1())
+        remove(this.keyConfiguration.removeStrategy)
         moveToTile(playerXState.value + dx, playerYState.value)
     }
 
     override fun moveVertical(dy: Int) {
-        remove(RemoveLock1())
+        remove(this.keyConfiguration.removeStrategy)
         moveToTile(playerXState.value, playerYState.value + dy)
     }
 
@@ -350,7 +356,7 @@ class Key1 : Tile {
 
 }
 
-class Lock1 : Tile {
+class Lock(private val keyConfiguration: KeyConfiguration) : Tile {
     override fun isFlux(): Boolean = false
     override fun isUnbreakable(): Boolean = false
     override fun isStone(): Boolean = false
@@ -358,13 +364,13 @@ class Lock1 : Tile {
     override fun isBox(): Boolean = false
 
     override fun isKey1(): Boolean = false
-    override fun isLock1(): Boolean = true
+    override fun isLock1(): Boolean = keyConfiguration.is1
     override fun isKey2(): Boolean = false
-    override fun isLock2(): Boolean = false
+    override fun isLock2(): Boolean = !keyConfiguration.is1
     override fun isAir(): Boolean = false
     override fun isPlayer(): Boolean = false
     override fun draw(drawScope: DrawScope, x: Int, y: Int) =
-        drawScope.drawRect(color = Color(0xffffcc00), topLeft = topLeft(x, y), size = size())
+        drawScope.drawRect(color = this.keyConfiguration.color, topLeft = topLeft(x, y), size = size())
 
 
     override fun moveHorizontal(dx: Int) {}
@@ -399,113 +405,6 @@ class Lock1 : Tile {
     }
 
 
-}
-
-class Key2 : Tile {
-    override fun isFlux(): Boolean = false
-    override fun isUnbreakable(): Boolean = false
-    override fun isStone(): Boolean = false
-
-    override fun isBox(): Boolean = false
-
-    override fun isKey1(): Boolean = false
-    override fun isLock1(): Boolean = false
-    override fun isKey2(): Boolean = true
-    override fun isLock2(): Boolean = false
-    override fun isAir(): Boolean = false
-    override fun isPlayer(): Boolean = false
-    override fun draw(drawScope: DrawScope, x: Int, y: Int) =
-        drawScope.drawRect(color = Color(0xff00ccff), topLeft = topLeft(x, y), size = size())
-
-
-    override fun moveHorizontal(dx: Int) {
-        removeLock2()
-        moveToTile(playerXState.value + dx, playerYState.value)
-    }
-
-    override fun moveVertical(dy: Int) {
-        removeLock2()
-        moveToTile(playerXState.value, playerYState.value + dy)
-    }
-
-    override fun isStony(): Boolean {
-        return false
-    }
-
-    override fun isBoxy(): Boolean {
-        return false
-    }
-
-    override fun drop() {
-
-    }
-
-    override fun rest() {
-
-    }
-
-    override fun isFalling(): Boolean {
-        return false
-    }
-
-    override fun canFall(): Boolean {
-        return false
-    }
-
-    override fun update(x: Int, y: Int) {
-
-    }
-
-
-}
-
-class Lock2 : Tile {
-    override fun isFlux(): Boolean = false
-    override fun isUnbreakable(): Boolean = false
-    override fun isStone(): Boolean = false
-
-    override fun isBox(): Boolean = false
-
-    override fun isKey1(): Boolean = false
-    override fun isLock1(): Boolean = false
-    override fun isKey2(): Boolean = false
-    override fun isLock2(): Boolean = true
-    override fun isAir(): Boolean = false
-    override fun isPlayer(): Boolean = false
-    override fun draw(drawScope: DrawScope, x: Int, y: Int) =
-        drawScope.drawRect(color = Color(0xff00ccff), topLeft = topLeft(x, y), size = size())
-
-
-    override fun moveHorizontal(dx: Int) {}
-
-    override fun moveVertical(dy: Int) {}
-    override fun isStony(): Boolean {
-        return false
-    }
-
-    override fun isBoxy(): Boolean {
-        return false
-    }
-
-    override fun drop() {
-
-    }
-
-    override fun rest() {
-
-    }
-
-    override fun isFalling(): Boolean {
-        return false
-    }
-
-    override fun canFall(): Boolean {
-        return false
-    }
-
-    override fun update(x: Int, y: Int) {
-
-    }
 }
 
 class Air : Tile {
