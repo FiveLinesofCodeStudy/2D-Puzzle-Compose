@@ -1,6 +1,6 @@
 class FallStrategy(private var falling: FallingState) {
     fun update(tile: Tile, x: Int, y: Int) {
-        this.falling = if (map[y + 1][x].isAir()) Falling() else Resting()
+        this.falling = map[y + 1][x].getBlockOnTopState()
         drop(y, x, tile)
     }
 
@@ -10,9 +10,4 @@ class FallStrategy(private var falling: FallingState) {
             map[y][x] = Air()
         }
     }
-
-    fun isFalling(): FallingState {
-        return this.falling
-    }
-
 }

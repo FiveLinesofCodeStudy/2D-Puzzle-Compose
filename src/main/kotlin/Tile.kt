@@ -18,6 +18,10 @@ interface Tile {
     fun rest() {}
 
     fun update(x: Int, y: Int) {}
+
+    fun getBlockOnTopState(): FallingState {
+        return Resting()
+    }
 }
 
 
@@ -50,7 +54,7 @@ class Stone(private var falling: FallingState) : Tile {
         drawScope.drawRect(color = Color(0xff0000cc), topLeft = topLeft(x, y), size = size())
 
     override fun moveHorizontal(dx: Int) {
-        this.fallStrategy.isFalling().moveHorizontal(this, dx)
+        this.falling.moveHorizontal(this, dx)
     }
 
     override fun moveVertical(dy: Int) {
@@ -143,6 +147,10 @@ class Air : Tile {
 
     override fun moveVertical(dy: Int) {
         moveToTile(playerXState.value, playerYState.value + dy)
+    }
+
+    override fun getBlockOnTopState(): FallingState {
+        return Falling()
     }
 }
 
