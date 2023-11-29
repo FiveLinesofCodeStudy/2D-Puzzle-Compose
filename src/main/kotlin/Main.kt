@@ -6,7 +6,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -82,12 +81,12 @@ fun moveToTile(newx: Int, newy: Int) {
     playerYState.value = newy
 }
 
-fun update(inputs: SnapshotStateList<Input>) {
-    handleInputs(inputs)
+fun update() {
+    handleInputs()
     updateMap()
 }
 
-private fun handleInputs(inputs: SnapshotStateList<Input>) {
+private fun handleInputs() {
     while (inputs.size > 0) {
         val current = inputs.removeLast()
         current.handle(map)
@@ -134,20 +133,17 @@ fun topLeft(x: Int, y: Int) = Offset((x * TITLE_SIZE).toFloat(), (y * TITLE_SIZE
 
 
 @Composable
-fun gameLoop(
-    inputs: SnapshotStateList<Input>
-) {
-    update(inputs)
+fun gameLoop() {
+    update()
     draw()
 }
 
 @Suppress("FunctionName")
 @Composable
 @Preview
-fun App(inputs: SnapshotStateList<Input>) {
-
+fun App() {
     MaterialTheme {
-        gameLoop(inputs = inputs)
+        gameLoop()
     }
 }
 
@@ -159,6 +155,6 @@ fun main() = application {
         onKeyEvent = {
             it.processKeyEvent()
         }) {
-        App(inputs)
+        App()
     }
 }
