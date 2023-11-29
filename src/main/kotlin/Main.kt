@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -17,25 +16,6 @@ import androidx.compose.ui.window.application
 const val TITLE_SIZE = 100
 
 fun size() = Size(TITLE_SIZE.toFloat(), TITLE_SIZE.toFloat())
-
-
-fun transform(i: Int): Tile {
-    return when (i) {
-        0 -> Air()
-        1 -> Flux()
-        2 -> Unbreakable()
-        3 -> PlayerTile()
-        4 -> Stone(Falling())
-        5 -> Stone(Resting())
-        6 -> Box(Resting())
-        7 -> Box(Falling())
-        8 -> TileKey(KeyConfiguration(Color(0xffffcc00), RemoveLock1(), true))
-        9 -> Lock(KeyConfiguration(Color(0xffffcc00), RemoveLock1(), is1 = true))
-        10 -> TileKey(KeyConfiguration(Color(0xff00ccff), RemoveLock2(), is1 = false))
-        11 -> Lock(KeyConfiguration(Color(0xff00ccff), RemoveLock2(), is1 = false))
-        else -> throw Exception("Unexpected tile: $i")
-    }
-}
 
 val rawMap = arrayOf(
     arrayOf(2, 2, 2, 2, 2, 2, 2, 2),
@@ -54,7 +34,7 @@ fun transformMap() {
     map = MutableList(rawMap.size) { MutableList(rawMap[0].size) { Air() } }
     for (y in rawMap.indices) {
         for (x in rawMap[y].indices) {
-            map[y][x] = transform(rawMap[y][x])
+            map[y][x] = Tile.transform(rawMap[y][x])
         }
     }
 }
@@ -67,11 +47,6 @@ fun remove(shouldRemove: RemoveStrategy) {
             }
         }
     }
-}
-
-fun update() {
-    handleInputs()
-    updateMap()
 }
 
 private fun handleInputs() {
@@ -111,17 +86,12 @@ fun topLeft(x: Int, y: Int) = Offset((x * TITLE_SIZE).toFloat(), (y * TITLE_SIZE
 
 
 @Composable
-fun gameLoop() {
-    update()
-    draw()
-}
-
-@Suppress("FunctionName")
-@Composable
 @Preview
-fun App() {
+fun app() {
     MaterialTheme {
-        gameLoop()
+        handleInputs()
+        updateMap()
+        draw()
     }
 }
 
@@ -130,9 +100,7 @@ fun main() = application {
     transformMap()
     Window(
         onCloseRequest = ::exitApplication,
-        onKeyEvent = {
-            it.processKeyEvent()
-        }) {
-        App()
+        onKeyEvent = { it.processKeyEvent() }) {
+        app()
     }
 }
