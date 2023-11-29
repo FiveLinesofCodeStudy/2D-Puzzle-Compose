@@ -5,10 +5,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -26,7 +24,7 @@ fun transform(i: Int): Tile {
         0 -> Air()
         1 -> Flux()
         2 -> Unbreakable()
-        3 -> Player()
+        3 -> PlayerTile()
         4 -> Stone(Falling())
         5 -> Stone(Resting())
         6 -> Box(Resting())
@@ -38,9 +36,6 @@ fun transform(i: Int): Tile {
         else -> throw Exception("Unexpected tile: $i")
     }
 }
-
-val playerXState = mutableStateOf(1)
-val playerYState = mutableStateOf(1)
 
 val rawMap = arrayOf(
     arrayOf(2, 2, 2, 2, 2, 2, 2, 2),
@@ -74,13 +69,6 @@ fun remove(shouldRemove: RemoveStrategy) {
     }
 }
 
-fun moveToTile(newx: Int, newy: Int) {
-    map[playerYState.value][playerXState.value] = Air()
-    map[newy][newx] = Player()
-    playerXState.value = newx
-    playerYState.value = newy
-}
-
 fun update() {
     handleInputs()
     updateMap()
@@ -107,18 +95,8 @@ fun draw() {
     // typescript와 달리 여기서는 canvas 객체를 따로 만들어서 재사용하는 건 없음.
     Canvas(modifier = Modifier.width(1200.dp).height(800.dp)) {
         drawMap()
-        drawPlayer()  // map 위에 Player 를 그림.
+        player.value.draw(this)
     }
-}
-
-private fun DrawScope.drawPlayer() {
-    val player = Rect(
-        playerXState.value * TITLE_SIZE.toFloat(),
-        playerYState.value * TITLE_SIZE.toFloat(),
-        TITLE_SIZE.toFloat(),
-        TITLE_SIZE.toFloat()
-    )
-    drawRect(color = Color(0xffff0000), player.topLeft, size())
 }
 
 private fun DrawScope.drawMap() {

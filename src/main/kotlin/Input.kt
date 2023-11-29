@@ -4,7 +4,6 @@ interface Input {
     fun isUp(): Boolean
     fun isDown(): Boolean
 
-    // 4.1.4 클래스로 코드 이관하기
     fun handle(mapState: MutableList<MutableList<Tile>>)
 }
 
@@ -15,7 +14,7 @@ class Right : Input {
     override fun isDown(): Boolean = false
 
     override fun handle(mapState: MutableList<MutableList<Tile>>) {
-        map[playerYState.value][playerXState.value + 1].moveHorizontal(1)
+        player.value.moveHorizontal(1)
     }
 }
 
@@ -26,7 +25,7 @@ class Left : Input {
     override fun isDown(): Boolean = false
 
     override fun handle(mapState: MutableList<MutableList<Tile>>) {
-        map[playerYState.value][playerXState.value + -1].moveHorizontal(-1)
+        player.value.moveHorizontal(-1)
     }
 }
 
@@ -39,7 +38,7 @@ class Up : Input {
     override fun handle(
         mapState: MutableList<MutableList<Tile>>
     ) {
-        map[playerYState.value + -1][playerXState.value].moveVertical(-1)
+        player.value.moveVertical(-1)
     }
 }
 
@@ -52,6 +51,6 @@ class Down : Input {
     override fun handle(
         mapState: MutableList<MutableList<Tile>>
     ) {
-        map[playerYState.value + 1][playerXState.value].moveVertical(1)
+        player.value.moveVertical(1)
     }
 }
