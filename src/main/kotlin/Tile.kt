@@ -9,15 +9,15 @@ interface Tile {
 
     fun draw(drawScope: DrawScope, x: Int, y: Int)
 
-    fun moveHorizontal(player: Player, dx: Int) {}
+    fun moveHorizontal(map: Map, player: Player, dx: Int) {}
 
-    fun moveVertical(player: Player, dy: Int) {}
+    fun moveVertical(map: Map, player: Player, dy: Int) {}
 
     fun drop() {}
 
     fun rest() {}
 
-    fun update(x: Int, y: Int) {}
+    fun update(map: Map, x: Int, y: Int) {}
 
     fun getBlockOnTopState(): FallingState {
         return Resting()
@@ -49,12 +49,12 @@ class Flux : Tile {
     override fun draw(drawScope: DrawScope, x: Int, y: Int) =
         drawScope.drawRect(color = Color(0xffccffcc), topLeft = topLeft(x, y), size = size())
 
-    override fun moveHorizontal(player: Player, dx: Int) {
-        player.move(dx, 0)
+    override fun moveHorizontal(map: Map, player: Player, dx: Int) {
+        player.move(map, dx, 0)
     }
 
-    override fun moveVertical(player: Player, dy: Int) {
-        player.move(0, dy)
+    override fun moveVertical(map: Map, player: Player, dy: Int) {
+        player.move(map, 0, dy)
     }
 }
 
@@ -69,8 +69,8 @@ class Stone(private var falling: FallingState) : Tile {
     override fun draw(drawScope: DrawScope, x: Int, y: Int) =
         drawScope.drawRect(color = Color(0xff0000cc), topLeft = topLeft(x, y), size = size())
 
-    override fun moveHorizontal(player: Player, dx: Int) {
-        this.falling.moveHorizontal(this, player, dx)
+    override fun moveHorizontal(map: Map, player: Player, dx: Int) {
+        this.falling.moveHorizontal(map, this, player, dx)
     }
 
     override fun drop() {
@@ -81,8 +81,8 @@ class Stone(private var falling: FallingState) : Tile {
         this.falling = Resting()
     }
 
-    override fun update(x: Int, y: Int) {
-        this.fallStrategy.update(this, x, y)
+    override fun update(map: Map, x: Int, y: Int) {
+        this.fallStrategy.update(map, this, x, y)
     }
 }
 
@@ -92,8 +92,8 @@ class Box(private var falling: FallingState) : Tile {
     override fun draw(drawScope: DrawScope, x: Int, y: Int) =
         drawScope.drawRect(color = Color(0xff8b4513), topLeft = topLeft(x, y), size = size())
 
-    override fun moveHorizontal(player: Player, dx: Int) {
-        this.falling.moveHorizontal(this, player, dx)
+    override fun moveHorizontal(map: Map, player: Player, dx: Int) {
+        this.falling.moveHorizontal(map, this, player, dx)
     }
 
     override fun drop() {
@@ -104,8 +104,8 @@ class Box(private var falling: FallingState) : Tile {
         this.falling = Resting()
     }
 
-    override fun update(x: Int, y: Int) {
-        this.fallStrategy.update(this, x, y)
+    override fun update(map: Map, x: Int, y: Int) {
+        this.fallStrategy.update(map, this, x, y)
     }
 
 }
@@ -115,14 +115,14 @@ class TileKey(private val keyConfiguration: KeyConfiguration) : Tile {
     override fun draw(drawScope: DrawScope, x: Int, y: Int) =
         drawScope.drawRect(color = this.keyConfiguration.color, topLeft = topLeft(x, y), size = size())
 
-    override fun moveHorizontal(player: Player, dx: Int) {
-        remove(this.keyConfiguration.removeStrategy)
-        player.move(dx, 0)
+    override fun moveHorizontal(map: Map, player: Player, dx: Int) {
+        remove(map, this.keyConfiguration.removeStrategy)
+        player.move(map, dx, 0)
     }
 
-    override fun moveVertical(player: Player, dy: Int) {
-        remove(this.keyConfiguration.removeStrategy)
-        player.move(0, dy)
+    override fun moveVertical(map: Map, player: Player, dy: Int) {
+        remove(map, this.keyConfiguration.removeStrategy)
+        player.move(map, 0, dy)
     }
 
 }
@@ -147,12 +147,12 @@ class Air : Tile {
     override fun draw(drawScope: DrawScope, x: Int, y: Int) {}
 
 
-    override fun moveHorizontal(player: Player, dx: Int) {
-        player.move(dx, 0)
+    override fun moveHorizontal(map: Map, player: Player, dx: Int) {
+        player.move(map, dx, 0)
     }
 
-    override fun moveVertical(player: Player, dy: Int) {
-        player.move(0, dy)
+    override fun moveVertical(map: Map, player: Player, dy: Int) {
+        player.move(map, 0, dy)
     }
 
     override fun getBlockOnTopState(): FallingState {

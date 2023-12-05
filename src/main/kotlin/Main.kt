@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
@@ -17,33 +16,15 @@ const val TITLE_SIZE = 100
 
 fun size() = Size(TITLE_SIZE.toFloat(), TITLE_SIZE.toFloat())
 
-val rawMap = arrayOf(
-    arrayOf(2, 2, 2, 2, 2, 2, 2, 2),
-    arrayOf(2, 3, 0, 1, 1, 2, 0, 2),
-    arrayOf(2, 4, 2, 6, 1, 2, 0, 2),
-    arrayOf(2, 8, 4, 1, 1, 2, 0, 2),
-    arrayOf(2, 4, 1, 1, 1, 9, 0, 2),
-    arrayOf(2, 2, 2, 2, 2, 2, 2, 2)
-)
-
-var map: MutableList<MutableList<Tile>> = mutableListOf()
+private var map = Map()
 
 val inputs = mutableStateListOf<Input>()
 
-fun transformMap() {
-    map = MutableList(rawMap.size) { MutableList(rawMap[0].size) { Air() } }
-    for (y in rawMap.indices) {
-        for (x in rawMap[y].indices) {
-            map[y][x] = Tile.transform(rawMap[y][x])
-        }
-    }
-}
-
-fun remove(shouldRemove: RemoveStrategy) {
-    for (y in map.indices) {
-        for (x in map[y].indices) {
-            if (shouldRemove.check(map[y][x])) {
-                map[y][x] = Air()
+fun remove(map: Map, shouldRemove: RemoveStrategy) {
+    for (y in map.getMap().indices) {
+        for (x in map.getMap()[y].indices) {
+            if (shouldRemove.check(map.getMap()[y][x])) {
+                map.getMap()[y][x] = Air()
             }
         }
     }
@@ -56,29 +37,13 @@ private fun handleInputs() {
     }
 }
 
-private fun updateMap() {
-    for (y in map.size - 1 downTo 0) {
-        for (x in map[y].indices) {
-            map[y][x].update(x, y)
-        }
-    }
-}
-
 
 @Composable
 fun draw() {
     // typescript와 달리 여기서는 canvas 객체를 따로 만들어서 재사용하는 건 없음.
     Canvas(modifier = Modifier.width(1200.dp).height(800.dp)) {
-        drawMap()
+        map.draw(this)
         player.value.draw(this)
-    }
-}
-
-private fun DrawScope.drawMap() {
-    for (y in map.indices) {
-        for (x in map[y].indices) {
-            map[y][x].draw(this, x, y)
-        }
     }
 }
 
@@ -90,14 +55,12 @@ fun topLeft(x: Int, y: Int) = Offset((x * TITLE_SIZE).toFloat(), (y * TITLE_SIZE
 fun app() {
     MaterialTheme {
         handleInputs()
-        updateMap()
+        map.update()
         draw()
     }
 }
 
 fun main() = application {
-
-    transformMap()
     Window(
         onCloseRequest = ::exitApplication,
         onKeyEvent = { it.processKeyEvent() }) {

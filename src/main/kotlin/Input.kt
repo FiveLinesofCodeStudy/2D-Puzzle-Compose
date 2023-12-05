@@ -4,7 +4,7 @@ interface Input {
     fun isUp(): Boolean
     fun isDown(): Boolean
 
-    fun handle(mapState: MutableList<MutableList<Tile>>)
+    fun handle(map: Map)
 }
 
 class Right : Input {
@@ -13,8 +13,8 @@ class Right : Input {
     override fun isUp(): Boolean = false
     override fun isDown(): Boolean = false
 
-    override fun handle(mapState: MutableList<MutableList<Tile>>) {
-        player.value.moveHorizontal(1)
+    override fun handle(map: Map) {
+        player.value.moveHorizontal(map, 1)
     }
 }
 
@@ -24,8 +24,8 @@ class Left : Input {
     override fun isUp(): Boolean = false
     override fun isDown(): Boolean = false
 
-    override fun handle(mapState: MutableList<MutableList<Tile>>) {
-        player.value.moveHorizontal(-1)
+    override fun handle(map: Map) {
+        player.value.moveHorizontal(map, -1)
     }
 }
 
@@ -35,10 +35,8 @@ class Up : Input {
     override fun isUp(): Boolean = true
     override fun isDown(): Boolean = false
 
-    override fun handle(
-        mapState: MutableList<MutableList<Tile>>
-    ) {
-        player.value.moveVertical(-1)
+    override fun handle(map: Map) {
+        player.value.moveVertical(map, -1)
     }
 }
 
@@ -48,9 +46,7 @@ class Down : Input {
     override fun isUp(): Boolean = false
     override fun isDown(): Boolean = true
 
-    override fun handle(
-        mapState: MutableList<MutableList<Tile>>
-    ) {
-        player.value.moveVertical(1)
+    override fun handle(map: Map) {
+        player.value.moveVertical(map, 1)
     }
 }
