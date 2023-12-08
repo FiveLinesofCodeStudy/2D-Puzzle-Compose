@@ -12,6 +12,7 @@ private val rawMap = arrayOf(
 class Map {
     private var map: MutableList<MutableList<Tile>> = MutableList(rawMap.size) { MutableList(rawMap[0].size) { Air() } }
 
+    // 6.4 transform을 init 블록으로 옮기기
     init {
         for (y in rawMap.indices) {
             for (x in rawMap[y].indices) {
