@@ -1,13 +1,6 @@
 import androidx.compose.ui.graphics.drawscope.DrawScope
 
-private val rawMap = arrayOf(
-    arrayOf(2, 2, 2, 2, 2, 2, 2, 2),
-    arrayOf(2, 3, 0, 1, 1, 2, 0, 2),
-    arrayOf(2, 4, 2, 6, 1, 2, 0, 2),
-    arrayOf(2, 8, 4, 1, 1, 2, 0, 2),
-    arrayOf(2, 4, 1, 1, 1, 9, 0, 2),
-    arrayOf(2, 2, 2, 2, 2, 2, 2, 2)
-)
+private val rawMap = RAW_TILES
 
 class Map {
     private var map: MutableList<MutableList<Tile>> = MutableList(rawMap.size) { MutableList(rawMap[0].size) { Air() } }
@@ -16,7 +9,7 @@ class Map {
     init {
         for (y in rawMap.indices) {
             for (x in rawMap[y].indices) {
-                map[y][x] = Tile.transform(rawMap[y][x])
+                map[y][x] = rawMap[y][x].transform()
             }
         }
     }
